@@ -1,0 +1,4 @@
+services:
+  # Database service
+  database:
+    ports: [3306:3306]

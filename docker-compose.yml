@@ -1,0 +1,28 @@
+services:
+  # Database service
+  database:
+    build:
+      context: ./database
+      args:
+        PUID: ${PUID:-1000}
+        PGID: ${PGID:-1000}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: 'appdb'
+      MARIADB_AUTO_UPGRADE: 'yes'
+      DB_HOST: '127.0.0.1'
+      DB_NAME: 'appdb'
+      DB_USER: 'root'
+      DB_PASS: ''
+      TZ: ${TZ:-UTC}
+    healthcheck:
+      test: ['CMD-SHELL', 'test -f /var/tmp/ready.status']
+      interval: 5s
+      timeout: 10s
+      retries: 1
+    volumes:
+      - ${DB_DATA_DIR:?}:/var/lib/mysql:delegated
+    expose:
+      - '3306'
