@@ -29,7 +29,7 @@ naming convention:
 YYYYMMDDHHII-a-name-in-dash-case.ts
 ```
 
-Migrations can also be ran on demand with the following command:
+Migrations can also be run on demand with the following command:
 ```sh
 docker compose exec database run-script migrate  # Inside Docker
 yarn migrate                                     # Outside Docker
