@@ -1,0 +1,163 @@
+<?php
+use App\DB;
+use App\Session;
+
+Session::requireAuth();
+$accountId = Session::getAccountId();
+$successModal = false;
+
+if (isset($_POST['firstname'])) {
+    $firstname = trim($_POST['firstname'] ?? '');
+    $lastname = trim($_POST['lastname'] ?? '');
+
+    // Validate account details
+    $allValid = true;
+    if (empty($firstname)) {
+        $firstnameInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($firstname) > ACCOUNT_FIRSTNAME_MAX_LENGTH) {
+        $firstnameInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (empty($lastname)) {
+        $lastnameInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($lastname) > ACCOUNT_LASTNAME_MAX_LENGTH) {
+        $lastnameInvalid = 'Field is too long';
+        $allValid = false;
+    }
+
+    // Update details
+    if ($allValid) {
+        $now = gmdate('Y-m-d H:i:s');
+        DB::query(
+            'UPDATE accounts SET firstname=?s, lastname=?s, updated_at=?s WHERE id=?i',
+            $firstname,
+            $lastname,
+            $now,
+            $accountId
+        );
+        $successModal = 'details';
+    }
+}
+
+if (isset($_POST['password'])) {
+    $password = $_POST['password'] ?? '';
+    $passwordNew = $_POST['password-new'] ?? '';
+    $passwordConfirm = $_POST['password-confirm'] ?? '';
+
+    // Validate new password
+    $allValid = true;
+    if (mb_strlen($passwordNew) < ACCOUNT_PASSWORD_MIN_LENGTH) {
+        $passwordNewInvalid = sprintf('Must have ≥%d characters', ACCOUNT_PASSWORD_MIN_LENGTH);
+        $allValid = false;
+    }
+    if ($passwordNew !== $passwordConfirm) {
+        $passwordConfirmInvalid = 'Passwords do not match';
+        $allValid = false;
+    }
+
+    // Validate current password
+    $passwordHash = DB::getOne('SELECT `password` FROM accounts WHERE id=?i', $accountId);
+    if (!password_verify($password, $passwordHash)) {
+        $passwordInvalid = 'Incorrect password';
+        $allValid = false;
+    }
+
+    // Update password
+    if ($allValid) {
+        $now = gmdate('Y-m-d H:i:s');
+        DB::query(
+            'UPDATE accounts SET `password`=?s, updated_at=?s WHERE id=?i',
+            password_hash($passwordNew, PASSWORD_BCRYPT, ['cost' => 12]),
+            $now,
+            $accountId
+        );
+        $successModal = 'password';
+    }
+}
+
+// Get account details to render in template
+$account = DB::getRow('SELECT firstname, lastname, email FROM accounts WHERE id=?i', $accountId);
+$firstname ??= $account['firstname'];
+$lastname ??= $account['lastname'];
+$email = $account['email'];
+?>
+
+<?php $this->layout('base', ['title' => 'Account']) ?>
+
+<div class="container">
+    <form class="wide-form" method="post">
+        <h3>Account details</h3>
+        <?php if ($successModal === 'details') { ?>
+            <div class="alert alert-success" role="alert">Your account details were successfully updated.</div>
+        <?php } ?>
+        <div class="row">
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="firstname">First name</label>
+                    <input type="text" class="form-control<?= empty($firstnameInvalid) ? '' : ' is-invalid' ?>" id="firstname" name="firstname" value="<?= $this->e($firstname ?? '') ?>" autocomplete="given-name" required>
+                    <?php if (!empty($firstnameInvalid)) { ?>
+                        <div class="invalid-feedback"><?= $firstnameInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="lastname">Last name</label>
+                    <input type="text" class="form-control<?= empty($lastnameInvalid) ? '' : ' is-invalid' ?>" id="lastname" name="lastname" value="<?= $this->e($lastname ?? '') ?>" autocomplete="family-name" required>
+                    <?php if (!empty($lastnameInvalid)) { ?>
+                        <div class="invalid-feedback"><?= $lastnameInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" value="<?= $this->e($email) ?>" autocomplete="username" readonly>
+        </div>
+        <button type="submit" class="btn btn-block btn-primary">Update information</button>
+        <hr class="mt-5">
+    </form>
+    <form class="wide-form" method="post">
+        <h3>Change password</h3>
+        <?php if ($successModal === 'password') { ?>
+            <div class="alert alert-success" role="alert">Your password was successfully updated.</div>
+        <?php } ?>
+        <input hidden type="text" autocomplete="username" value="<?= $this->e($email) ?>"> <?php /* For password managers */ ?>
+        <div class="form-group">
+            <label for="password">Current password</label>
+            <input type="password" class="form-control<?= empty($passwordInvalid) ? '' : ' is-invalid' ?>" id="password" name="password" autocomplete="current-password" aria-describedby="password-help" required>
+            <?php if (!empty($passwordInvalid)) { ?>
+                <div class="invalid-feedback"><?= $passwordInvalid ?></div>
+            <?php } ?>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="password-new">New password</label>
+                    <input type="password" class="form-control<?= empty($passwordNewInvalid) ? '' : ' is-invalid' ?>" id="password-new" name="password-new" autocomplete="new-password" aria-describedby="password-new-help" minlength="<?= ACCOUNT_PASSWORD_MIN_LENGTH ?>" required>
+                    <?php if (empty($passwordNewInvalid)) { ?>
+                        <small id="password-new-help" class="form-text text-muted">Use <?= ACCOUNT_PASSWORD_MIN_LENGTH ?> or more characters</small>
+                    <?php } else { ?>
+                        <div class="invalid-feedback"><?= $passwordNewInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="password-confirm">Confirm password</label>
+                    <input type="password" class="form-control<?= empty($passwordConfirmInvalid) ? '' : ' is-invalid' ?>" id="password-confirm" name="password-confirm" autocomplete="new-password" aria-describedby="password-confirm-help" minlength="<?= ACCOUNT_PASSWORD_MIN_LENGTH ?>" required>
+                    <?php if (empty($passwordConfirmInvalid)) { ?>
+                        <small id="password-confirm-help" class="form-text text-muted">Repeat the new password</small>
+                    <?php } else { ?>
+                        <div class="invalid-feedback"><?= $passwordConfirmInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-block btn-primary">Update password</button>
+    </form>
+</div>

@@ -1,0 +1,8 @@
+<?php http_response_code(500) ?>
+<?php $this->layout('base', ['title' => 'Server Error']) ?>
+
+<div class="container text-center py-5 my-5">
+    <h1>Server Error</h1>
+    <p class="lead mt-3 mb-5">Unfortunately we cannot handle your request right now.<br>Please try again in a few seconds.</p>
+    <a class="btn btn-outline-secondary" href="/"><i class="bi bi-house-door"></i> Go back to the homepage</a>
+</div>

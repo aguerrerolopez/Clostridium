@@ -26,3 +26,19 @@ services:
       - ${DB_DATA_DIR:?}:/var/lib/mysql:delegated
     expose:
       - '3306'
+
+  # Webserver service
+  webserver:
+    build: ./webserver
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DB_HOST: 'database'
+      DB_NAME: 'appdb'
+      DB_USER: 'appuser'
+      DB_PASS: ''
+      TZ: ${TZ:-UTC}
+    ports:
+      - 80:80

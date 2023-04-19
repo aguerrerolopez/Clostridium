@@ -1,0 +1,142 @@
+<?php
+use App\DB;
+use App\Response;
+use App\Session;
+
+// Redirect if already logged in
+if (Session::isAuthed()) {
+    Response::redirect('/account');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $firstname = trim($_POST['firstname'] ?? '');
+    $lastname = trim($_POST['lastname'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $passwordConfirm = $_POST['password-confirm'] ?? '';
+
+    // Validate account details
+    $allValid = true;
+    if (empty($firstname)) {
+        $firstnameInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($firstname) > ACCOUNT_FIRSTNAME_MAX_LENGTH) {
+        $firstnameInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (empty($lastname)) {
+        $lastnameInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($lastname) > ACCOUNT_LASTNAME_MAX_LENGTH) {
+        $lastnameInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        $emailInvalid = 'Not a valid email address';
+        $allValid = false;
+    }
+    if (mb_strlen($email) > ACCOUNT_EMAIL_MAX_LENGTH) {
+        $emailInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (mb_strlen($password) < ACCOUNT_PASSWORD_MIN_LENGTH) {
+        $passwordInvalid = sprintf('Must have ≥%d characters', ACCOUNT_PASSWORD_MIN_LENGTH);
+        $allValid = false;
+    }
+    if ($password !== $passwordConfirm) {
+        $passwordConfirmInvalid = 'Passwords do not match';
+        $allValid = false;
+    }
+
+    // Check existing email address
+    $emailInUse = DB::getOne('SELECT 1 FROM accounts WHERE email=?s', $email);
+    if ($emailInUse) {
+        $emailInvalid = 'That email address is already in use. Want to <a href="/login">login</a> instead?';
+        $allValid = false;
+    }
+
+    // Create account
+    if ($allValid) {
+        $now = gmdate('Y-m-d H:i:s');
+        $accountId = DB::query(
+            'INSERT INTO accounts (email, firstname, lastname, `password`, created_at, updated_at, last_seen_at)
+             VALUES (?s, ?s, ?s, ?s, ?s, ?s, ?s)',
+            $email,
+            $firstname,
+            $lastname,
+            password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
+            $now,
+            $now,
+            $now
+        )->insertId();
+
+        // Login and redirect to dashboard
+        Session::login($accountId);
+        Response::redirect('/history');
+    }
+}
+?>
+
+<?php $this->layout('base', ['title' => 'Sign Up']) ?>
+
+<div class="container">
+    <form class="session-form" method="post">
+        <h2>Sign Up</h2>
+        <div class="row">
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="firstname">First name</label>
+                    <input type="text" class="form-control<?= empty($firstnameInvalid) ? '' : ' is-invalid' ?>" id="firstname" name="firstname" value="<?= $this->e($firstname ?? '') ?>" placeholder="Jane" autocomplete="given-name" required>
+                    <?php if (!empty($firstnameInvalid)) { ?>
+                        <div class="invalid-feedback"><?= $firstnameInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="lastname">Last name</label>
+                    <input type="text" class="form-control<?= empty($lastnameInvalid) ? '' : ' is-invalid' ?>" id="lastname" name="lastname" value="<?= $this->e($lastname ?? '') ?>" placeholder="Doe" autocomplete="family-name" required>
+                    <?php if (!empty($lastnameInvalid)) { ?>
+                        <div class="invalid-feedback"><?= $lastnameInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" class="form-control<?= empty($emailInvalid) ? '' : ' is-invalid' ?>" id="email" name="email" value="<?= $this->e($email ?? '') ?>" placeholder="jane.doe@example.com" autocomplete="username" aria-describedby="email-help" required>
+            <?php if (empty($emailInvalid)) { ?>
+                <small id="email-help" class="form-text text-muted">Please use your <em>institutional</em> email address</small>
+            <?php } else { ?>
+                <div class="invalid-feedback"><?= $emailInvalid ?></div>
+            <?php } ?>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control<?= empty($passwordInvalid) ? '' : ' is-invalid' ?>" id="password" name="password" autocomplete="new-password" aria-describedby="password-help" minlength="<?= ACCOUNT_PASSWORD_MIN_LENGTH ?>" required>
+                    <?php if (empty($passwordInvalid)) { ?>
+                        <small id="password-help" class="form-text text-muted">Use <?= ACCOUNT_PASSWORD_MIN_LENGTH ?> or more characters</small>
+                    <?php } else { ?>
+                        <div class="invalid-feedback"><?= $passwordInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="form-group">
+                    <label for="password-confirm">Confirm password</label>
+                    <input type="password" class="form-control<?= empty($passwordConfirmInvalid) ? '' : ' is-invalid' ?>" id="password-confirm" name="password-confirm" autocomplete="new-password" aria-describedby="password-confirm-help" minlength="<?= ACCOUNT_PASSWORD_MIN_LENGTH ?>" required>
+                    <?php if (empty($passwordConfirmInvalid)) { ?>
+                        <small id="password-confirm-help" class="form-text text-muted">Repeat the new password</small>
+                    <?php } else { ?>
+                        <div class="invalid-feedback"><?= $passwordConfirmInvalid ?></div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-block btn-primary">Create Account</button>
+    </form>
+</div>

@@ -1,0 +1,13 @@
+FROM php:8.2-fpm-alpine
+ARG HOSTNAME
+RUN apk --no-cache add curl tzdata supervisor nginx \
+    && docker-php-ext-install mysqli \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Copy app
+COPY . /app
+WORKDIR /
+RUN composer install --working-dir=/app --optimize-autoloader \
+    && mv /app/nginx.conf /etc/nginx/nginx.conf
+
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "/app/supervisord.conf"]

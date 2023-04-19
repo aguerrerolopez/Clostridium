@@ -1,0 +1,31 @@
+<?php $uri = \App\Http::getUri() ?>
+<header class="px-0 py-3 border-bottom">
+    <div class="container">
+        <div class="row no-gutters">
+            <div class="col-12 col-sm-auto d-flex align-items-center flex-wrap">
+                <a class="navbar-brand mx-auto mr-sm-3 p-0 text-reset" href="/"><?= APP_NAME ?></a>
+            </div>
+            <div class="col-12 col-sm my-2 my-sm-0">
+                <ul class="nav justify-content-center justify-content-sm-start">
+                    <li class="nav-item">
+                        <a href="/upload" class="nav-link <?= $uri === '/upload' ? 'active' : 'text-secondary' ?>">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/history" class="nav-link <?= $uri === '/history' ? 'active' : 'text-secondary' ?>">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/account" class="nav-link <?= $uri === '/account' ? 'active' : 'text-secondary' ?>">Account</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-12 col-sm-auto d-flex align-items-center flex-wrap justify-content-center justify-content-sm-start">
+                <?php if (\App\Session::isAuthed()) { ?>
+                    <a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
+                <?php } else { ?>
+                    <a href="/login" class="btn btn-sm btn-link text-reset mr-2">Login</a>
+                    <a href="/signup" class="btn btn-sm btn-outline-dark">Sign Up</a>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</header>

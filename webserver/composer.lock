@@ -1,0 +1,139 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "8645b77b497ef5ff25d82b83a1d36878",
+    "packages": [
+        {
+            "name": "josemmo/umysql",
+            "version": "v0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/josemmo/umysql.git",
+                "reference": "dffd3a93b18e04ca7d4950828d1e47621642230b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/josemmo/umysql/zipball/dffd3a93b18e04ca7d4950828d1e47621642230b",
+                "reference": "dffd3a93b18e04ca7d4950828d1e47621642230b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mysqli": "*",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "jetbrains/phpstorm-stubs": "^2022.1",
+                "psalm/plugin-phpunit": "^0.17.0",
+                "symfony/phpunit-bridge": "*",
+                "vimeo/psalm": "^4.24"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "UMySQL\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "José Miguel Moreno",
+                    "email": "josemmo@pm.me",
+                    "homepage": "https://github.com/josemmo"
+                }
+            ],
+            "description": "Uncomplicated MySQL Abstraction Layer",
+            "homepage": "https://github.com/josemmo/umysql",
+            "keywords": [
+                "database",
+                "mysql",
+                "mysqli"
+            ],
+            "support": {
+                "issues": "https://github.com/josemmo/umysql/issues",
+                "source": "https://github.com/josemmo/umysql/tree/v0.0.1"
+            },
+            "time": "2022-07-05T13:38:03+00:00"
+        },
+        {
+            "name": "league/plates",
+            "version": "v3.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/plates.git",
+                "reference": "a6a3238e46c6e19af7318fdc36bfbe49b0620231"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/plates/zipball/a6a3238e46c6e19af7318fdc36bfbe49b0620231",
+                "reference": "a6a3238e46c6e19af7318fdc36bfbe49b0620231",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0|^8.0"
+            },
+            "require-dev": {
+                "mikey179/vfsstream": "^1.6",
+                "phpunit/phpunit": "^9.5",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\Plates\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jonathan Reinink",
+                    "email": "jonathan@reinink.ca",
+                    "role": "Developer"
+                },
+                {
+                    "name": "RJ Garcia",
+                    "email": "ragboyjr@icloud.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Plates, the native PHP template system that's fast, easy to use and easy to extend.",
+            "homepage": "https://platesphp.com",
+            "keywords": [
+                "league",
+                "package",
+                "templates",
+                "templating",
+                "views"
+            ],
+            "support": {
+                "issues": "https://github.com/thephpleague/plates/issues",
+                "source": "https://github.com/thephpleague/plates/tree/v3.5.0"
+            },
+            "time": "2023-01-16T20:25:45+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=8.0"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
+}
