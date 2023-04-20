@@ -26,4 +26,12 @@ class Http {
     public static function getUri(bool $withQuery = false): string {
         return $withQuery ? $_SERVER['REQUEST_URI'] : strtok($_SERVER['REQUEST_URI'], '?');
     }
+
+    /**
+     * Get server base URL
+     * @return string Base URL
+     */
+    public static function getBaseUrl(): string {
+        return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
+    }
 }

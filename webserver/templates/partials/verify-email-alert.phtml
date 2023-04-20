@@ -1,0 +1,33 @@
+<?php
+use App\DB;
+use App\Http;
+use App\Session;
+
+if (!Session::isVerified()) { ?>
+    <form action="/verify-email" method="post" class="alert alert-warning p-4 border border-dark text-dark" role="alert">
+        <h5 class="alert-heading"><i class="bi bi-envelope-check mr-1"></i> Verify your email address</h5>
+        <?php $sentAt = DB::getOne('SELECT verification_sent_at FROM accounts WHERE id=?i', Session::getAccountId()) ?>
+        <?php if ($sentAt === null) { ?>
+            <p>In order to confirm your affiliation, we need to verify your email address.</p>
+            <button type="submit" class="btn btn-warning">Send verification link</button>
+        <?php } else { ?>
+            <?php $canResendAt = strtotime($sentAt)+EMAIL_VERIFICATION_DELAY ?>
+            <p>You should have received an email with a verification link. Make sure to check your spam folder.</p>
+            <div class="row">
+                <div class="col-sm-auto">
+                    <button type="submit" class="btn btn-warning"<?= $canResendAt > time() ? ' disabled' : '' ?>>Re-send verification link</button>
+                </div>
+                <?php if ($canResendAt > time()) { ?>
+                    <div class="col-sm align-self-center">
+                        <?php $hours = max(round(($canResendAt - time()) / 3600), 1) ?>
+                        <small class="text-muted">
+                            <?= $hours == 1 ? 'Wait an hour before requesting a new link' : sprintf('Wait %d hours before requesting a new link', $hours) ?>
+                        </small>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php } ?>
+        <input type="hidden" name="action" value="request-link">
+        <input type="hidden" name="redirect" value="<?= $this->e(Http::getUri(true)) ?>">
+    </form>
+<?php } ?>

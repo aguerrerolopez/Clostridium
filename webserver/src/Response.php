@@ -5,6 +5,16 @@ use League\Plates\Engine;
 
 class Response {
     /**
+     * Return HTTP status response without body
+     *
+     * @param int $code Status code
+     */
+    public static function status(int $code): never {
+        http_response_code($code);
+        exit;
+    }
+
+    /**
      * Redirection response
      *
      * @param string  $url       Redirection URL

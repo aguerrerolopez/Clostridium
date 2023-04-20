@@ -1,0 +1,91 @@
+<?php
+use App\DB;
+use App\Http;
+use App\Mailgun;
+use App\Response;
+use App\Session;
+
+// Send verification link
+if (isset($_POST['action']) && $_POST['action'] === 'request-link') {
+    Session::requireAuth();
+    if (Session::isVerified()) {
+        Response::status(401);
+    }
+
+    // Can send a new link?
+    $accountId = Session::getAccountId();
+    $now = time();
+    $sentAt = DB::getOne('SELECT verification_sent_at FROM accounts WHERE id=?i', $accountId);
+    $canResendAt = strtotime($sentAt ?? 0) + EMAIL_VERIFICATION_DELAY;
+    if ($canResendAt > $now) {
+        Response::status(401);
+    }
+
+    // Generate link
+    $email = Session::getEmail();
+    $token = bin2hex(random_bytes(20));
+    $link = Http::getBaseUrl() . '/verify-email?email=' . urlencode($email) . '&token=' . urlencode($token);
+
+    // Persist in database
+    DB::query(
+        'UPDATE accounts SET verification_token=?s, verification_sent_at=?s WHERE id=?i',
+        $token,
+        gmdate('Y-m-d H:i:s', $now),
+        $accountId
+    );
+
+    // Send link
+    $subject = sprintf('Your verification link for %s', APP_NAME);
+    $message = sprintf(
+        "Hello %s,\n\n" .
+        "Please verify your email address by visiting the following link:\n" .
+        "%s\n\n" .
+        "Regards,\nThe %s Team",
+        Session::getFirstname(),
+        $link,
+        APP_NAME
+    );
+    Mailgun::sendEmail($email, $subject, $message);
+
+    // Redirect to destination
+    $redirectUri = parse_url($_POST['redirect'] ?? '/account');
+    $redirectUri = $redirectUri['path'] . (isset($redirectUri['query']) ? "?{$redirectUri['query']}" : '');
+    Response::redirect($redirectUri);
+}
+
+// Validate token
+$email = $_GET['email'] ?? '';
+$token = $_GET['token'] ?? '';
+$accountId = DB::getOne(
+    'SELECT id
+     FROM accounts
+     WHERE email=?s
+     AND verification_token=?s
+     AND verification_sent_at>=?s
+     AND verified_at IS NULL',
+    $email,
+    $token,
+    gmdate('Y-m-d H:i:s', time()-EMAIL_VERIFICATION_LIFETIME)
+);
+if (!empty($accountId)) {
+    DB::query(
+        'UPDATE accounts SET verification_token=NULL, verified_at=?s WHERE id=?i',
+        gmdate('Y-m-d H:i:s'),
+        $accountId
+    );
+}
+?>
+
+<?php header('x-robots-tag: noindex,nofollow') ?>
+<?php $this->layout('base', ['title' => 'Verify email address']) ?>
+
+<div class="container text-center py-5 my-5">
+    <?php if (empty($accountId)) { ?>
+        <h1>Invalid verification link</h1>
+        <p class="mt-3 mb-2">This link is invalid or has expired. Please request a new verification link.</p>
+    <?php } else { ?>
+        <h1>Email address verified</h1>
+        <p class="mt-3 mb-2">The email address <strong><?= $this->e($email) ?></strong> was successfully verified.</p>
+        <p>You can safely close this page now.</p>
+    <?php } ?>
+</div>

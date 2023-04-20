@@ -1,6 +1,6 @@
 (function() {
     // Loading state in forms
-    var $forms = document.querySelectorAll('form.session-form, form.wide-form');
+    var $forms = document.querySelectorAll('form');
     for (var i=0; i<$forms.length; i++) {
         var $form = $forms[i];
         $form.addEventListener('submit', function() {

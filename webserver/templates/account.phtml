@@ -80,15 +80,15 @@ if (isset($_POST['password'])) {
 }
 
 // Get account details to render in template
-$account = DB::getRow('SELECT firstname, lastname, email FROM accounts WHERE id=?i', $accountId);
-$firstname ??= $account['firstname'];
-$lastname ??= $account['lastname'];
-$email = $account['email'];
+$firstname ??= Session::getFirstname();
+$lastname ??= Session::getLastname();
+$email = Session::getEmail();
 ?>
 
 <?php $this->layout('base', ['title' => 'Account']) ?>
 
 <div class="container">
+    <?php $this->insert('partials/verify-email-alert') ?>
     <form class="wide-form" method="post">
         <h3>Account details</h3>
         <?php if ($successModal === 'details') { ?>
@@ -115,7 +115,7 @@ $email = $account['email'];
             </div>
         </div>
         <div class="form-group">
-            <label for="email">Email address</label>
+            <label for="email">Email address<?= Session::isVerified() ? ' <i class="bi bi-patch-check-fill"></i>' : '' ?></label>
             <input type="email" class="form-control" id="email" name="email" value="<?= $this->e($email) ?>" autocomplete="username" readonly>
         </div>
         <button type="submit" class="btn btn-block btn-primary">Update information</button>

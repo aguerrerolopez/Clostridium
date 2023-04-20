@@ -13,6 +13,7 @@ $pageName = match ($uri) {
     '/logout'            => 'logout',
     '/password-recovery' => 'password-recovery',
     '/account'           => 'account',
+    '/verify-email'      => 'verify-email',
     default              => 'not-found',
 };
 

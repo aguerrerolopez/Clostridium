@@ -5,16 +5,17 @@ use RuntimeException;
 
 class Session {
     /**
-     * Logged account ID, `false` if unauthenticated or `null` if not initialized
+     * Logged account details, `null` if unauthenticated or `false` if not initialized
+     * @var array<string,string|null>|null|false
      */
-    private static string|null|false $accountId = null;
+    private static array|null|false $account = false;
 
     /**
      * Initialize session (if needed)
      * @throws RuntimeException if failed to initialize session
      */
     private static function initialize(): void {
-        if (self::$accountId !== null) {
+        if (self::$account !== false) {
             // Already initialized
             return;
         }
@@ -22,16 +23,15 @@ class Session {
 
         // Get account details from token
         $token = $_COOKIE[SESSION_COOKIE_NAME] ?? '';
-        $account = DB::getRow(
-            'SELECT account, refreshes_at FROM `sessions` WHERE token=?s AND expires_at>?s',
+        self::$account = DB::getRow(
+            'SELECT a.id, a.email, a.firstname, a.lastname, a.verified_at, s.refreshes_at
+             FROM `sessions` s
+             LEFT JOIN accounts a ON s.account=a.id
+             WHERE s.token=?s AND s.expires_at>?s',
             $token,
             gmdate('Y-m-d H:i:s', $now)
         );
-        self::$accountId = ($account === null) ? false : $account['account'];
-        if (self::$accountId === null) {
-            throw new RuntimeException("Received NULL account ID from database for session token '$token'");
-        }
-        if (self::$accountId === false) {
+        if (self::$account === null) {
             // No account found
             return;
         }
@@ -49,11 +49,11 @@ class Session {
         DB::query(
             'UPDATE accounts SET last_seen_at=?s WHERE id=?i',
             gmdate('Y-m-d H:i:s', $now),
-            self::$accountId
+            self::$account['id']
         );
 
         // Refresh session token if (needed)
-        $refreshesAt = strtotime($account['refreshes_at']);
+        $refreshesAt = strtotime(self::$account['refreshes_at']);
         if ($now >= $refreshesAt) {
             $newToken = self::generateToken();
             $refreshesAt = $now + SESSION_REFRESH_LIFETIME;
@@ -78,27 +78,78 @@ class Session {
     }
 
     /**
-     * Get logged account ID
-     *
-     * @return int Account ID
-     * @throws RuntimeException if unauthenticated
-     */
-    public static function getAccountId(): int {
-        self::initialize();
-        if (self::$accountId === false) {
-            throw new RuntimeException('Unauthenticated request');
-        }
-        return self::$accountId;
-    }
-
-    /**
      * Is authenticated request
      *
      * @return boolean Whether request is authenticated or not
      */
     public static function isAuthed(): bool {
         self::initialize();
-        return (self::$accountId !== false);
+        return (self::$account !== null);
+    }
+
+    /**
+     * Get account field value
+     *
+     * @param  string      $field Field name
+     * @return string|null        Field value
+     * @throws RuntimeException if unauthenticated
+     */
+    private static function get(string $field): ?string {
+        self::initialize();
+        if (self::$account === null) {
+            throw new RuntimeException('Unauthenticated request');
+        }
+        return self::$account[$field] ?? null;
+    }
+
+    /**
+     * Get logged account ID
+     *
+     * @return string Account ID
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function getAccountId(): string {
+        return self::get('id');
+    }
+
+    /**
+     * Get logged account email address
+     *
+     * @return string Account email address
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function getEmail(): string {
+        return self::get('email');
+    }
+
+    /**
+     * Get logged account firstname
+     *
+     * @return string Account firstname
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function getFirstname(): string {
+        return self::get('firstname');
+    }
+
+    /**
+     * Get logged account lastname
+     *
+     * @return string Account lastname
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function getLastname(): string {
+        return self::get('lastname');
+    }
+
+    /**
+     * Is logged account verified
+     *
+     * @return boolean Whether account is verified
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function isVerified(): bool {
+        return (self::get('verified_at') !== null);
     }
 
     /**
