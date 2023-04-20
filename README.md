@@ -12,6 +12,11 @@ PUID=1000                            # Process UID for containers with mounted v
 PGID=1000                            # Process GID for containers with mounted volumes
 TZ="Europe/Madrid"                   # Only for logs (database always stores timestamps in UTC)
 DB_DATA_DIR="/path/to/db/data/dir"   # Path to database data directory (read-write)
+
+# Mailgun settings (for sending emails)
+MAILGUN_DOMAIN="example.com"         # Mailgun domain
+MAILGUN_FROM="no-reply@example.com"  # Email address of the sender
+MAILGUN_APIKEY="key-xxxxxxxxxxxxxx"  # Mailgun API key
 ```
 
 ## How to Run Locally

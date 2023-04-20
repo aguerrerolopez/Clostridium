@@ -6,6 +6,7 @@
     },
     "require": {
         "php": ">=8.0",
+        "ext-curl": "*",
         "josemmo/umysql": "^0.0.1",
         "league/plates": "^3.5"
     },

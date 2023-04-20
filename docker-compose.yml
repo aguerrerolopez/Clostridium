@@ -39,6 +39,9 @@ services:
       DB_NAME: 'appdb'
       DB_USER: 'appuser'
       DB_PASS: ''
+      MAILGUN_DOMAIN: ${MAILGUN_DOMAIN:-}
+      MAILGUN_FROM: ${MAILGUN_FROM:-}
+      MAILGUN_APIKEY: ${MAILGUN_APIKEY:-}
       TZ: ${TZ:-UTC}
     ports:
       - 80:80
