@@ -35,12 +35,14 @@ class Mailgun {
 <style type="text/css">
 body {
     margin: 0;
-    padding: 20px;
-    background: #eff2f4;
+    background-color: #eff2f4;
     font-family: sans-serif;
 }
+.wrapper {
+    padding: 20px;
+}
 .container {
-    background: #fff;
+    background-color: #fff;
     margin: 0 auto;
     padding: 20px;
     max-width: 600px;
@@ -56,8 +58,10 @@ a.link:visited {
 }
 </style>
 </head>
-<body>
-    <div class="container">{$message}</table>
+<body style="background-color:#eff2f4" bgcolor="#eff2f4">
+    <div class="wrapper">
+        <div class="container">{$message}</div>
+    </div>
 </body>
 </html>
 HTML;

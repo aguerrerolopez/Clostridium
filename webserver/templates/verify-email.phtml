@@ -40,9 +40,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'request-link') {
         "Hello %s,\n\n" .
         "Please verify your email address by visiting the following link:\n" .
         "%s\n\n" .
+        "Note the link will expire in %d hours.\n\n" .
         "Regards,\nThe %s Team",
         Session::getFirstname(),
         $link,
+        floor(EMAIL_VERIFICATION_LIFETIME / 3600),
         APP_NAME
     );
     Mailgun::sendEmail($email, $subject, $message);
