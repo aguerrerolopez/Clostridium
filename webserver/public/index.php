@@ -7,14 +7,15 @@ require __DIR__ . '/../bootstrap.php';
 // Get page name to load
 $uri = Http::getUri();
 $pageName = match ($uri) {
-    '/'                  => 'homepage',
-    '/login'             => 'login',
-    '/signup'            => 'signup',
-    '/logout'            => 'logout',
-    '/password-recovery' => 'password-recovery',
-    '/account'           => 'account',
-    '/verify-email'      => 'verify-email',
-    default              => 'not-found',
+    '/'                       => 'homepage',
+    '/login'                  => 'login',
+    '/signup'                 => 'signup',
+    '/logout'                 => 'logout',
+    '/reset-password'         => 'reset-password',
+    '/reset-password-confirm' => 'reset-password-confirm',
+    '/account'                => 'account',
+    '/verify-email'           => 'verify-email',
+    default                   => 'not-found',
 };
 
 // Load page contents
