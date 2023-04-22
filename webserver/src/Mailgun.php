@@ -23,7 +23,7 @@ class Mailgun {
         // Build HTML body
         $subject = htmlentities($subject);
         $message = str_replace("\n", "<br>\n", $message);
-        $message = preg_replace('/https?:\/\/.+/', '<a href="$0" class="link">$0</a>', $message);
+        $message = preg_replace('/https?:\/\/[^\s<]+/', '<a href="$0" class="link">$0</a>', $message);
         $html = <<<HTML
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
