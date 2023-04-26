@@ -1,6 +1,6 @@
 <?php
-use App\Http;
-use App\Response;
+use App\Utils\Http;
+use App\Utils\Response;
 
 require __DIR__ . '/../bootstrap.php';
 

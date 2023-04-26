@@ -1,7 +1,7 @@
 <?php
-use App\DB;
-use App\Http;
-use App\Session;
+use App\Utils\DB;
+use App\Utils\Http;
+use App\Utils\Session;
 
 if (!Session::isVerified()) { ?>
     <form action="/verify-email" method="post" class="alert alert-warning p-4 border border-dark text-dark" role="alert">

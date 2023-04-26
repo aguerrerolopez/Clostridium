@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace App\Utils;
 
 use League\Plates\Engine;
 
@@ -32,7 +32,7 @@ class Response {
      * @param array<string,mixed> $data     Data for template
      */
     public static function html(string $template, array $data = []): never {
-        $engine = new Engine(__DIR__ . '/../templates', 'phtml');
+        $engine = new Engine(__DIR__ . '/../../templates', 'phtml');
         echo $engine->render($template, $data);
         exit;
     }

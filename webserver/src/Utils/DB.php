@@ -1,5 +1,5 @@
 <?php
-namespace App;
+namespace App\Utils;
 
 use UMySQL\Exceptions\ParseException;
 use UMySQL\Result;

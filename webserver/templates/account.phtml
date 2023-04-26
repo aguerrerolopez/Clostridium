@@ -1,6 +1,6 @@
 <?php
-use App\DB;
-use App\Session;
+use App\Utils\DB;
+use App\Utils\Session;
 
 Session::requireAuth();
 $accountId = Session::getAccountId();

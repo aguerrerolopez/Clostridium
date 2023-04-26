@@ -1,4 +1,4 @@
-<?php $uri = \App\Http::getUri() ?>
+<?php $uri = \App\Utils\Http::getUri() ?>
 <header class="px-0 py-3 border-bottom">
     <div class="container">
         <div class="row no-gutters">
@@ -19,7 +19,7 @@
                 </ul>
             </div>
             <div class="col-12 col-sm-auto d-flex align-items-center flex-wrap justify-content-center justify-content-sm-start">
-                <?php if (\App\Session::isAuthed()) { ?>
+                <?php if (\App\Utils\Session::isAuthed()) { ?>
                     <a href="/logout" class="btn btn-sm btn-outline-dark">Logout</a>
                 <?php } else { ?>
                     <a href="/login" class="btn btn-sm btn-link text-reset mr-2">Login</a>
