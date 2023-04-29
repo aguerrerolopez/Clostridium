@@ -1,0 +1,43 @@
+<?php
+use App\Utils\Session;
+
+Session::requireAuth();
+?>
+
+<?php $this->layout('base', ['title' => 'Upload samples']) ?>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="upload-area my-3 text-muted">
+                <div class="text">
+                    <div class="icon"><i class="bi bi-upload"></i></div>
+                    <p>Drag and drop your samples or click to <span class="text-primary">open a browse dialog</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <h5 class="my-3">Tips for uploading samples</h5>
+            <div class="upload-tip">
+                <div class="bullet text-success"><i class="bi bi-check-square-fill"></i></div>
+                <div class="text">Upload MALDI-TOF samples acquired with Bruker Daltonics Flex machines.</div>
+            </div>
+            <div class="upload-tip">
+                <div class="bullet text-success"><i class="bi bi-check-square-fill"></i></div>
+                <div class="text">Lorem, ipsum dolor sit amet consectetur adipisicing elit.</div>
+            </div>
+            <div class="upload-tip">
+                <div class="bullet text-success"><i class="bi bi-check-square-fill"></i></div>
+                <div class="text">Molestias adipisci libero magnam praesentium vel quibusdam maiores reprehenderit.</div>
+            </div>
+            <div class="upload-tip">
+                <div class="bullet text-danger"><i class="bi bi-x-square-fill"></i></div>
+                <div class="text">Refrain from uploading more than 1k samples at once.</div>
+            </div>
+            <div class="upload-tip">
+                <div class="bullet text-danger"><i class="bi bi-x-square-fill"></i></div>
+                <div class="text">Facilis nihil delectus tempora id pariatur.</div>
+            </div>
+        </div>
+    </div>
+</div>
