@@ -8,6 +8,7 @@ RUN apk --no-cache add curl tzdata supervisor nginx \
 COPY . /app
 WORKDIR /
 RUN composer install --working-dir=/app --optimize-autoloader \
-    && mv /app/nginx.conf /etc/nginx/nginx.conf
+    && mv /app/nginx.conf /etc/nginx/nginx.conf \
+    && mv /app/php-custom.ini $PHP_INI_DIR/conf.d/zz-custom.ini
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/app/supervisord.conf"]
