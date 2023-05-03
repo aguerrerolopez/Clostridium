@@ -28,13 +28,13 @@ Before analysis, we extract the following metadata from a sample:
 | Field                                      | Variable     | File   | Example                               |
 |--------------------------------------------|--------------|--------|---------------------------------------|
 | Sample ID                                  | `##$ID_raw`  | *acqu* | fb60fc50-f999-42bb-a40e-0bcc5e262e1d  |
-| Adquisition date                           | `##$AQ_DATE` | *acqu* | 2023-02-22T12:48:09.692+01:00         |
+| Acquisition date                           | `##$AQ_DATE` | *acqu* | 2023-02-22T12:48:09.692+01:00         |
 | Instrument serial number                   | `##$InstrID` | *acqu* | 8604832.05252                         |
 | Instrument type                            | `##$InstTyp` | *acqu* | 9                                     |
 | Digitizer type                             | `##$DIGTYP`  | *acqu* | 19                                    |
 | Sample position (aka "pocillo")            | `##$PATCHNO` | *acqu* | E1                                    |
 | Target ID (to group different samples)     | `##$TgIDS`   | *acqu* | G_FE4FEFFA_0C05_4941_B01DB2DEDEF2F95F |
-| flexControl version (adquisition software) | `##$FCVer`   | *acqu* | flexControl 3.4.207.20                |
+| flexControl version (acquisition software) | `##$FCVer`   | *acqu* | flexControl 3.4.207.20                |
 | AIDA version (calibration software)        | `##$Acquver` | *proc* | AIDA4.7.373.7                         |
 | Calibration date                           | `##$CLDATE`  | *proc* | 2023-02-21T08:58:28.000+00:00         |
 
