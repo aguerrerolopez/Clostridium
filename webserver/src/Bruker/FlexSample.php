@@ -301,6 +301,12 @@ class FlexSample {
             throw new RuntimeException('Spectrum type must be time-of-flight (ToF)');
         }
 
+        // Validate spectrum
+        $spectrumBytes = strlen($this->getFileContents('fid'));
+        if (($spectrumBytes % 4) !== 0) {
+            throw new RuntimeException('Spectrum file ("fid") has an invalid size');
+        }
+
         // Validate acquisition metadata
         if (mb_strtolower($this->getMetadata('acqu', 'TITLE')) !== 'xmass parameter file') {
             throw new RuntimeException('Acquisition metadata is not an XMASS Parameter file');
