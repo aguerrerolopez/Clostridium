@@ -31,6 +31,15 @@ class FlexSample {
     }
 
     /**
+     * Get base path
+     *
+     * @return string Base path
+     */
+    public function getBasePath(): string {
+        return $this->basePath;
+    }
+
+    /**
      * Add file to sample
      *
      * @param  string          $path Relative path to file
