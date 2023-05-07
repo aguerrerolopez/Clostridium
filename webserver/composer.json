@@ -4,11 +4,20 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.2",
         "ext-curl": "*",
+        "ext-zip": "*",
         "josemmo/umysql": "^0.0.1",
         "league/plates": "^3.5"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^6.2"
     },
     "config": {
         "process-timeout": 0,

@@ -1,7 +1,7 @@
 FROM php:8.2-fpm-alpine
 ARG HOSTNAME
-RUN apk --no-cache add curl tzdata supervisor nginx \
-    && docker-php-ext-install mysqli \
+RUN apk --no-cache add curl libzip-dev tzdata supervisor nginx \
+    && docker-php-ext-install mysqli zip \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy app
