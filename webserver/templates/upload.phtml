@@ -1,7 +1,7 @@
 <?php
 use App\Utils\Session;
 
-Session::requireAuth();
+// Session::requireAuth(); // TODO: uncomment
 ?>
 
 <?php $this->layout('base', ['title' => 'Upload samples']) ?>
@@ -10,9 +10,20 @@ Session::requireAuth();
     <div class="row">
         <div class="col-lg-8">
             <div class="upload-area my-3 text-muted">
-                <div class="text">
+                <div class="feedback feedback-initial">
                     <div class="icon"><i class="bi bi-upload"></i></div>
                     <p>Drag and drop your samples or click to <span class="text-primary">open a browse dialog</span></p>
+                </div>
+                <div class="feedback feedback-error text-danger d-none">
+                    <div class="icon"><i class="bi bi-exclamation-diamond"></i></div>
+                    <p></p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Try again</button>
+                </div>
+                <div class="feedback feedback-uploading d-none">
+                    <p>Uploading samples...</p>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -24,20 +35,24 @@ Session::requireAuth();
             </div>
             <div class="upload-tip">
                 <div class="bullet text-success"><i class="bi bi-check-square-fill"></i></div>
-                <div class="text">Lorem, ipsum dolor sit amet consectetur adipisicing elit.</div>
+                <div class="text">Create a ZIP archive or drag and drop a folder directly up to <?= ini_get('post_max_size') ?>B in size.</div>
             </div>
             <div class="upload-tip">
                 <div class="bullet text-success"><i class="bi bi-check-square-fill"></i></div>
-                <div class="text">Molestias adipisci libero magnam praesentium vel quibusdam maiores reprehenderit.</div>
+                <div class="text">The upload can contain multiple samples, each in their own directory.</div>
             </div>
             <div class="upload-tip">
                 <div class="bullet text-danger"><i class="bi bi-x-square-fill"></i></div>
                 <div class="text">Refrain from uploading more than 1k samples at once.</div>
             </div>
-            <div class="upload-tip">
-                <div class="bullet text-danger"><i class="bi bi-x-square-fill"></i></div>
-                <div class="text">Facilis nihil delectus tempora id pariatur.</div>
+            <div class="my-3 text-muted small">
+                Still unsure what to upload? <a href="/sample-maldi-tof.zip">Click here</a> to download a valid sample
+                to see its structure.
             </div>
         </div>
     </div>
 </div>
+
+<?php $this->push('scripts') ?>
+    <script src="/jszip.min.js"></script>
+<?php $this->end() ?>

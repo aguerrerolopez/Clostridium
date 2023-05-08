@@ -42,20 +42,33 @@ form.wide-form h3 {
     }
 }
 
-.upload-area:hover {
+.upload-area:hover,
+.upload-area.hover {
     background-color: #f2f8ff;
     border-color: #007bff;
 }
 
-.upload-area .text {
+.upload-area.locked {
+    background-color: transparent !important;
+    border-color: #6c757d !important;
+    cursor: default;
+}
+
+.upload-area .feedback {
+    max-width: 18rem;
     font-weight: 500;
     text-align: center;
 }
 
-.upload-area .text .icon {
+.upload-area .feedback .icon {
     margin-bottom: 0.6rem;
     font-size: 3em;
     text-align: center;
+}
+
+.upload-area .feedback .progress {
+    width: 15rem;
+    height: 0.5rem;
 }
 
 .upload-tip {
