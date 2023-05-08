@@ -24,9 +24,14 @@
         var onFiles = function(files) {
             $uploadArea.classList.add('locked');
 
-            // Check for empty list of files (IE limitation)
+            // Check for empty list of files
             if (files.length === 0) {
-                showFeedbackError('Your browser does not support uploading folders, please create a ZIP archive and upload that');
+                var isInternetExplorer = /MSIE | Trident\//.test(window.navigator.userAgent);
+                showFeedbackError(
+                    isInternetExplorer ?
+                    'Your browser does not support uploading folders, please create a ZIP archive and upload that' :
+                    'Cannot upload an empty folder'
+                );
                 return;
             }
 
