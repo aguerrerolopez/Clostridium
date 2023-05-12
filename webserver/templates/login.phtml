@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Session::login($account['id']);
 
         // Redirect to destination
-        $redirectUri = parse_url($_GET['redirect'] ?? '/history');
+        $redirectUri = parse_url($_GET['redirect'] ?? '/upload');
         $redirectUri = $redirectUri['path'] . (isset($redirectUri['query']) ? "?{$redirectUri['query']}" : '');
         Response::redirect($redirectUri);
     }

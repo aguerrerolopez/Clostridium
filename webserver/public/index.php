@@ -14,6 +14,7 @@ $pageName = match ($uri) {
     '/reset-password'         => 'reset-password',
     '/reset-password-confirm' => 'reset-password-confirm',
     '/upload'                 => 'upload',
+    '/results'                => 'results',
     '/account'                => 'account',
     '/verify-email'           => 'verify-email',
     default                   => 'not-found',
