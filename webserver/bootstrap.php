@@ -3,7 +3,7 @@
 date_default_timezone_set('UTC');
 
 // Define constants
-const APP_NAME = 'Untitled Project';
+const APP_NAME = 'AutoCdiff';
 
 const ACCOUNT_FIRSTNAME_MAX_LENGTH = 100;
 const ACCOUNT_LASTNAME_MAX_LENGTH = 100;
