@@ -21,7 +21,7 @@ services:
       test: ['CMD-SHELL', 'test -f /var/tmp/ready.status']
       interval: 5s
       timeout: 10s
-      retries: 1
+      retries: 10
     volumes:
       - ${DB_DATA_DIR:?}:/var/lib/mysql:delegated
     expose:
