@@ -81,3 +81,25 @@ form.wide-form h3 {
 .upload-tip .bullet {
     margin-right: 0.5em;
 }
+
+/* Results */
+table.results-table td {
+    line-height: 1.1;
+    vertical-align: middle;
+}
+
+table.results-table th.col-name {
+    min-width: 10rem;
+}
+
+table.results-table td.col-buttons {
+    width: 0;
+}
+
+table.results-table .btn.btn-xs {
+    padding: 0.1em 0.3em;
+}
+
+table.results-table .btn.btn-xs:hover {
+    border-color: #6c757d;
+}

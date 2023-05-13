@@ -7,5 +7,99 @@ use App\Utils\Session;
 <?php $this->layout('base', ['title' => 'Results']) ?>
 
 <div class="container">
-    <p>This is the results page</p>
+    <div class="row mt-3 mb-4">
+        <div class="col-lg-7">
+            <form class="row no-gutters">
+                <div class="col-md">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        </div>
+                        <input class="form-control" type="text">
+                    </div>
+                </div>
+                <div class="col-md py-1 py-md-0 px-md-1">
+                    <select class="custom-select custom-select-sm">
+                        <option selected>All ribotypes</option>
+                        <option value="1">RT-027</option>
+                    </select>
+                </div>
+                <div class="col-md">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        </div>
+                        <input class="form-control" type="text">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-5 d-flex align-items-center justify-content-end mt-2 mt-lg-0">
+            <small class="text-muted">2 samples selected</small>
+            <button type="button" class="btn btn-sm btn-success ml-2"><i class="bi bi-cloud-arrow-down-fill"></i> Download ZIP</button>
+            <button type="button" class="btn btn-sm btn-info ml-1"><i class="bi bi-filetype-csv"></i> Export CSV</button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="results-table table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="all-samples">
+                            <label class="custom-control-label" for="all-samples"></label>
+                        </div>
+                    </th>
+                    <th scope="col" class="col-name">Name</th>
+                    <th scope="col">Position</th>
+                    <th scope="col" class="text-nowrap">Acquired At</th>
+                    <th scope="col" class="text-nowrap"><abbr title="Decision Tree">DT</abbr></th>
+                    <th scope="col" class="text-nowrap"><abbr title="Random Forest">RF</abbr></th>
+                    <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FA-VAE</abbr></th>
+                    <th scope="col" class="text-nowrap"><abbr title="Dual Bayesian Logistic Regressor">DBLR</abbr></th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="sample-0">
+                            <label class="custom-control-label" for="sample-0"></label>
+                        </div>
+                    </td>
+                    <td><a href="/results/aaaa">23050681</a></td>
+                    <td>E2</td>
+                    <td>2023-02-22 12:47</td>
+                    <td>RT027 <span class="badge badge-pill badge-warning">67%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">99%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">90%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">96%</span></td>
+                    <td class="col-buttons text-nowrap">
+                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-success"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                        <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="sample-1">
+                            <label class="custom-control-label" for="sample-1"></label>
+                        </div>
+                    </td>
+                    <td><a href="/results/aaaa">Clostridium difficile 239295-027/D3</a></td>
+                    <td>E1</td>
+                    <td>2020-03-15 18:34</td>
+                    <td>RT027 <span class="badge badge-pill badge-warning">65%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">98%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">87%</span></td>
+                    <td>RT027 <span class="badge badge-pill badge-success">91%</span></td>
+                    <td class="col-buttons text-nowrap">
+                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-success"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                        <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
