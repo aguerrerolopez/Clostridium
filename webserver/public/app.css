@@ -10,7 +10,7 @@ form.session-form {
 
 form.wide-form {
     max-width: 40rem;
-    margin: 2rem 0;
+    margin: 1rem 0 2rem 0;
 }
 
 form.session-form h2,
