@@ -7,7 +7,7 @@ RUN apk --no-cache add curl libzip-dev tzdata supervisor nginx \
 # Copy app
 COPY . /app
 WORKDIR /
-RUN composer install --working-dir=/app --optimize-autoloader \
+RUN composer install --working-dir=/app --no-dev --optimize-autoloader \
     && mv /app/nginx.conf /etc/nginx/nginx.conf \
     && mv /app/php-custom.ini $PHP_INI_DIR/conf.d/zz-custom.ini
 
