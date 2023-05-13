@@ -15,7 +15,7 @@ use App\Utils\Session;
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                         </div>
-                        <input class="form-control" type="text">
+                        <input class="form-control" type="text" value="Last 7 days">
                     </div>
                 </div>
                 <div class="col-md py-1 py-md-0 px-md-1">
@@ -36,12 +36,12 @@ use App\Utils\Session;
         </div>
         <div class="col-lg-5 d-flex align-items-center justify-content-end mt-2 mt-lg-0">
             <small class="text-muted">2 samples selected</small>
-            <button type="button" class="btn btn-sm btn-success ml-2"><i class="bi bi-cloud-arrow-down-fill"></i> Download ZIP</button>
-            <button type="button" class="btn btn-sm btn-info ml-1"><i class="bi bi-filetype-csv"></i> Export CSV</button>
+            <button type="button" class="btn btn-sm btn-info ml-2"><i class="bi bi-cloud-arrow-down-fill"></i> Download ZIP</button>
+            <button type="button" class="btn btn-sm btn-secondary ml-1"><i class="bi bi-filetype-csv"></i> Export CSV</button>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="results-table table table-sm">
+        <table class="results-table table table-sm table-hover">
             <thead>
                 <tr>
                     <th scope="col">
@@ -57,6 +57,7 @@ use App\Utils\Session;
                     <th scope="col" class="text-nowrap"><abbr title="Random Forest">RF</abbr></th>
                     <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FA-VAE</abbr></th>
                     <th scope="col" class="text-nowrap"><abbr title="Dual Bayesian Logistic Regressor">DBLR</abbr></th>
+                    <th scope="col" class="text-nowrap">Actual</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -75,8 +76,14 @@ use App\Utils\Session;
                     <td>RT027 <span class="badge badge-pill badge-success">99%</span></td>
                     <td>RT027 <span class="badge badge-pill badge-success">90%</span></td>
                     <td>RT027 <span class="badge badge-pill badge-success">96%</span></td>
+                    <td>
+                        <select class="form-control form-control-sm">
+                            <option selected disabled>Add...</option>
+                            <option>RT027</option>
+                        </select>
+                    </td>
                     <td class="col-buttons text-nowrap">
-                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-success"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
                         <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
                     </td>
                 </tr>
@@ -94,8 +101,13 @@ use App\Utils\Session;
                     <td>RT027 <span class="badge badge-pill badge-success">98%</span></td>
                     <td>RT027 <span class="badge badge-pill badge-success">87%</span></td>
                     <td>RT027 <span class="badge badge-pill badge-success">91%</span></td>
+                    <td>
+                        <select class="form-control form-control-sm">
+                            <option selected>RT027</option>
+                        </select>
+                    </td>
                     <td class="col-buttons text-nowrap">
-                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-success"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
                         <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
                     </td>
                 </tr>

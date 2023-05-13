@@ -96,6 +96,17 @@ table.results-table td.col-buttons {
     width: 0;
 }
 
+table.results-table .badge {
+    font-size: 65%;
+}
+
+table.results-table select.form-control-sm {
+    width: 3.9rem;
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+    font-size: 85%;
+}
+
 table.results-table .btn.btn-xs {
     padding: 0.1em 0.3em;
 }
