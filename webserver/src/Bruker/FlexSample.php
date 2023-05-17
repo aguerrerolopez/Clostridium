@@ -223,7 +223,7 @@ class FlexSample {
      */
     public function getPosition(): string {
         $position = $this->getMetadata('acqu', '$PATCHNO');
-        if (!preg_match('/^[A-Z][0-9]$/', $position)) {
+        if (!preg_match('/^[A-Z][0-9]{1,2}$/', $position)) {
             throw new RuntimeException('Invalid sample position ($PATCHNO)');
         }
         return $position;
