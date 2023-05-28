@@ -2,6 +2,12 @@
 use App\Utils\Session;
 
 // Session::requireAuth(); // TODO: uncomment
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // TODO: not implemented
+    var_dump($_FILES);
+    exit;
+}
 ?>
 
 <?php $this->layout('base', ['title' => 'Upload samples']) ?>
@@ -20,7 +26,7 @@ use App\Utils\Session;
                     <button type="button" class="btn btn-sm btn-outline-secondary">Try again</button>
                 </div>
                 <div class="feedback feedback-uploading d-none">
-                    <p>Uploading samples...</p>
+                    <p></p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
                     </div>

@@ -1,4 +1,6 @@
 (function() {
+    var isInternetExplorer = /MSIE | Trident\//.test(window.navigator.userAgent);
+
     /* Loading state in forms */
     $('form').on('submit', function() {
         const $formBtn = $(this).find('button[type="submit"]');
@@ -21,7 +23,6 @@
 
             // Check for empty list of files
             if (files.length === 0) {
-                var isInternetExplorer = /MSIE | Trident\//.test(window.navigator.userAgent);
                 showFeedbackError(
                     isInternetExplorer ?
                     'Your browser does not support uploading folders, please create a ZIP archive and upload that' :
@@ -57,13 +58,63 @@
             if (numOfRegularFiles > 0) {
                 showFeedbackUploading('Preparing files...', 0);
                 createZip(files).then(function(blob) {
-                    // TODO: upload `Blob`
+                    var file = new File([blob], 'samples.zip');
+                    uploadFile(file);
                 });
                 return;
             }
 
             // Upload ZIP archive
-            // TODO: upload `File`
+            var file = files[0];
+            if (file.isFile) {
+                file.file(function(vanillaFile) {
+                    uploadFile(vanillaFile);
+                });
+            } else {
+                uploadFile(file);
+            }
+        };
+
+        /**
+         * @param {File} file File instance
+         */
+        var uploadFile = function(file) {
+            var uploadMessage = 'Uploading...';
+            showFeedbackUploading(uploadMessage, 0);
+
+            // Fix progress bar in IE
+            if (isInternetExplorer) {
+                $uploadArea.find('.progress .progress-bar').css('transition', 'none');
+            }
+
+            // Send file to server
+            var payload = new FormData();
+            payload.append('samples', file);
+            $.ajax({
+                type: 'post',
+                url: document.location.href,
+                data: payload,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            var progress = (e.loaded / e.total) * 100;
+                            showFeedbackUploading(uploadMessage, progress);
+                        }
+                    }, false);
+                    return xhr;
+                }
+            }).done(function(data) {
+                // TODO
+            }).fail(function(e) {
+                if (e.status === 413) {
+                    showFeedbackError('The uploaded file is too large');
+                } else {
+                    showFeedbackError('Unexpected error');
+                }
+            });
         };
 
         /**
@@ -99,7 +150,7 @@
          * @param {string} message Message
          */
         var showFeedbackError = function(message) {
-            $uploadArea.find('.feedback-initial').addClass('d-none');
+            $uploadArea.find('.feedback-initial, .feedback-uploading').addClass('d-none');
             $uploadArea.find('.feedback-error p').html(message);
             $uploadArea.find('.feedback-error').removeClass('d-none');
         };
