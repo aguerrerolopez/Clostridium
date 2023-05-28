@@ -1,28 +1,23 @@
 (function() {
     /* Loading state in forms */
-    var $forms = document.querySelectorAll('form');
-    for (var i=0; i<$forms.length; i++) {
-        var $form = $forms[i];
-        $form.addEventListener('submit', function() {
-            const $formBtn = this.querySelector('button[type="submit"]');
-            $formBtn.disabled = true;
-            $formBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        });
-    }
+    $('form').on('submit', function() {
+        const $formBtn = $(this).find('button[type="submit"]');
+        $formBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+    });
 
     /* Upload page */
-    var $uploadArea = document.querySelector('.upload-area');
-    if ($uploadArea !== null) {
+    var $uploadArea = $('.upload-area');
+    if ($uploadArea.length > 0) {
         /** @return {boolean} Whether upload area is locked or not */
         var isLocked = function() {
-            return $uploadArea.classList.contains('locked');
+            return $uploadArea.hasClass('locked');
         }
 
         /**
          * @param {(File|FileSystemFileEntry)[]} files Files or file entries
          */
         var onFiles = function(files) {
-            $uploadArea.classList.add('locked');
+            $uploadArea.addClass('locked');
 
             // Check for empty list of files
             if (files.length === 0) {
@@ -100,9 +95,9 @@
          * @param {string} message Message
          */
         var showFeedbackError = function(message) {
-            $uploadArea.querySelector('.feedback-initial').classList.add('d-none');
-            $uploadArea.querySelector('.feedback-error p').innerHTML = message;
-            $uploadArea.querySelector('.feedback-error').classList.remove('d-none');
+            $uploadArea.find('.feedback-initial').addClass('d-none');
+            $uploadArea.find('.feedback-error p').html(message);
+            $uploadArea.find('.feedback-error').removeClass('d-none');
         };
 
         /**
@@ -110,10 +105,10 @@
          * @param {number} progress Progress between 0 and 100
          */
         var showFeedbackUploading = function(message, progress) {
-            $uploadArea.querySelector('.feedback-initial').classList.add('d-none');
-            $uploadArea.querySelector('.feedback-uploading p').innerHTML = message;
-            $uploadArea.querySelector('.feedback-uploading .progress-bar').style = 'width:'+progress+'%';
-            $uploadArea.querySelector('.feedback-uploading').classList.remove('d-none');
+            $uploadArea.find('.feedback-initial').addClass('d-none');
+            $uploadArea.find('.feedback-uploading p').html(message);
+            $uploadArea.find('.feedback-uploading .progress-bar').css('width', progress+'%');
+            $uploadArea.find('.feedback-uploading').removeClass('d-none');
         };
 
         /**
@@ -182,7 +177,7 @@
         };
 
         // Handle select file manually
-        $uploadArea.addEventListener('click', function() {
+        $uploadArea.click(function() {
             if (isLocked()) return;
             var input = document.createElement('input');
             input.type = 'file';
@@ -196,19 +191,19 @@
         // Handle drag and drop
         document.documentElement.addEventListener('dragover', function(e) {
             e.preventDefault();
-            $uploadArea.classList.add('hover');
+            $uploadArea.addClass('hover');
         });
         document.documentElement.addEventListener('dragleave', function(e) {
             e.preventDefault();
-            $uploadArea.classList.remove('hover');
+            $uploadArea.removeClass('hover');
         });
         document.documentElement.addEventListener('dragend', function(e) {
             e.preventDefault();
-            $uploadArea.classList.remove('hover');
+            $uploadArea.removeClass('hover');
         });
         document.documentElement.addEventListener('drop', function(e) {
             e.preventDefault();
-            $uploadArea.classList.remove('hover');
+            $uploadArea.removeClass('hover');
             if (!isLocked()) {
                 scanDataTransfer(e.dataTransfer).then(function(files) {
                     onFiles(files);
@@ -217,11 +212,11 @@
         });
 
         // Handle try again button
-        $uploadArea.querySelector('.feedback-error button').addEventListener('click', function(e) {
+        $uploadArea.find('.feedback-error button').click(function(e) {
             e.stopImmediatePropagation();
-            $uploadArea.querySelector('.feedback-error').classList.add('d-none');
-            $uploadArea.querySelector('.feedback-initial').classList.remove('d-none');
-            $uploadArea.classList.remove('locked');
+            $uploadArea.find('.feedback-error').addClass('d-none');
+            $uploadArea.find('.feedback-initial').removeClass('d-none');
+            $uploadArea.removeClass('locked');
         });
     }
 })();
