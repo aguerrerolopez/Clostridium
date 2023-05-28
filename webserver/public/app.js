@@ -48,6 +48,10 @@
                 showFeedbackError('Either drop a ZIP file or a folder, not both at the same time');
                 return;
             }
+            if (numOfRegularFiles === 1) {
+                showFeedbackError('Drop all files from the sample folder, not just one');
+                return;
+            }
 
             // Create ZIP archive
             if (numOfRegularFiles > 0) {
