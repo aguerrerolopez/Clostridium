@@ -124,6 +124,9 @@ final class FlexArchiveTest extends TestCase {
             $this->assertSame(true, $zip->open($tmpPath, ZipArchive::RDONLY), 'Exported sample is not a valid ZIP archive');
             $this->assertNotSame(false, $zip->locateName('acqu'), 'Missing "acqu" file from exported sample');
             $zip->close();
+
+            // Clean-up
+            unlink($tmpPath);
         }
     }
 }
