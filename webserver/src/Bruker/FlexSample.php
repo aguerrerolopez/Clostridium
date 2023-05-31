@@ -58,7 +58,7 @@ class FlexSample {
      * @return string       File contents
      * @throws RuntimeException if invalid path or failed to get contents
      */
-    public function getFileContents(string $path): string {
+    private function getFileContents(string $path): string {
         $data =& $this->files[$path];
 
         // Validate path
@@ -89,7 +89,7 @@ class FlexSample {
      * @return string        Field value or `null` if not found
      * @throws RuntimeException if not a valid metadata file or field not found
      */
-    public function getMetadata(string $path, string $field): string {
+    private function getMetadata(string $path, string $field): string {
         $metadata =& $this->metadata[$path];
 
         // Parse metadata file (if needed)

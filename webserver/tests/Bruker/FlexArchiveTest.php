@@ -30,6 +30,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E1',                                         $sample->getPosition());
         $this->assertEquals('3.4.207.20',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
 
         // Sample #2
         $sample = $samples['23050678/0_E2/1/1SLin'];
@@ -41,6 +43,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E2',                                         $sample->getPosition());
         $this->assertEquals('3.4.207.20',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
 
         // Sample #3
         $sample = $samples['23050679/0_E3/1/1SLin'];
@@ -52,6 +56,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E3',                                         $sample->getPosition());
         $this->assertEquals('3.4.207.20',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
 
         // Sample #4
         $sample = $samples['23050679/0_E4/1/1SLin'];
@@ -63,6 +69,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E4',                                         $sample->getPosition());
         $this->assertEquals('3.4.207.20',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
 
         // Sample #5
         $sample = $samples['Clostridium difficile 239295-027/D3/0_E1/1/1SLin'];
@@ -74,6 +82,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E1',                                         $sample->getPosition());
         $this->assertEquals('3.4.204.10',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2020-03-13T16:21:05.000+0000'), $sample->getCalibrationDate());
 
         // Sample #6
         $sample = $samples['Clostridium difficile 239295-027/D3/0_E1/2/1SLin'];
@@ -85,6 +95,8 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals(19,                                           $sample->getDigitizerType());
         $this->assertEquals('E1',                                         $sample->getPosition());
         $this->assertEquals('3.4.204.10',                                 $sample->getFlexControlVersion());
+        $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
+        $this->assertEquals(new DateTime('2020-03-13T16:21:05.000+0000'), $sample->getCalibrationDate());
     }
 
     public function testThrowsExceptionForInvalidArchives(): void {
