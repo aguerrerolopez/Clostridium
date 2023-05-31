@@ -282,6 +282,24 @@ class FlexSample {
     }
 
     /**
+     * Get digest of sample contents
+     *
+     * @return string SHA-256 digest in hexadecimal
+     */
+    public function getDigest(): string {
+        // Sort paths of files in sample (to be deterministic)
+        $sortedPaths = array_keys($this->files);
+        sort($sortedPaths);
+
+        // Compute hash of contents
+        $ctx = hash_init('sha256');
+        foreach ($sortedPaths as $path) {
+            hash_update($ctx, $this->getFileContents($path));
+        }
+        return hash_final($ctx);
+    }
+
+    /**
      * Validate sample
      *
      * @throws RuntimeException if failed to pass validation
