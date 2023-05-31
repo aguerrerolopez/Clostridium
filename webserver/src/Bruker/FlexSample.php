@@ -3,6 +3,7 @@ namespace App\Bruker;
 
 use DateTime;
 use RuntimeException;
+use ZipArchive;
 
 /**
  * A single sample extracted from a {@see FlexArchive} instance.
@@ -326,5 +327,29 @@ class FlexSample {
         }
         $this->getAidaVersion();
         $this->getCalibrationDate();
+    }
+
+    /**
+     * Export sample as ZIP archive
+     *
+     * @param string $path Destination path
+     * @throws RuntimeException if failed to export sample
+     */
+    public function export(string $path): void {
+        $zip = new ZipArchive();
+        $errorCode = $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        if ($errorCode !== true) {
+            throw new RuntimeException("Failed to open $path for writing with error code $errorCode");
+        }
+
+        // Add files
+        $acquiredAtTimestamp = $this->getAcquisitionDate()->getTimestamp();
+        foreach (array_keys($this->files) as $path) {
+            $zip->addFromString($path, $this->getFileContents($path));
+            $zip->setMtimeName($path, $acquiredAtTimestamp);
+        }
+
+        // Write to disk
+        $zip->close();
     }
 }

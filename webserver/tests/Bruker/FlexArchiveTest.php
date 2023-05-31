@@ -4,8 +4,10 @@ namespace Tests\Bruker;
 use App\Bruker\FlexArchive;
 use App\Bruker\FlexSample;
 use DateTime;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use ZipArchive;
 
 final class FlexArchiveTest extends TestCase {
     public function testParsesRawFlexArchives(): void {
@@ -102,5 +104,20 @@ final class FlexArchiveTest extends TestCase {
     public function testThrowsExceptionForInvalidArchives(): void {
         $this->expectException(RuntimeException::class);
         new FlexArchive(__DIR__ . '/samples-invalid.rar');
+    }
+
+    public function testExportsSampleToZipArchive(): void {
+        $archive = new FlexArchive(__DIR__ . '/samples-valid.zip');
+        foreach ($archive->getSamples() as $sample) {
+            // Export sample
+            $tmpPath = tempnam(sys_get_temp_dir(), 'flx');
+            $sample->export($tmpPath);
+
+            // Make sure it's a valid ZIP archive
+            $zip = new ZipArchive();
+            $this->assertSame(true, $zip->open($tmpPath, ZipArchive::RDONLY), 'Exported sample is not a valid ZIP archive');
+            $this->assertNotSame(false, $zip->locateName('acqu'), 'Missing "acqu" file from exported sample');
+            $zip->close();
+        }
     }
 }
