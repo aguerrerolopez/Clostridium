@@ -1,12 +1,13 @@
 <?php
 use App\Utils\Session;
 
-// Session::requireAuth(); // TODO: uncomment
+Session::requireAuth();
 ?>
 
 <?php $this->layout('base', ['title' => 'Results']) ?>
 
 <div class="container">
+    <?php $this->insert('partials/verify-email-alert') ?>
     <div class="row mt-3 mb-4">
         <div class="col-lg-7">
             <form class="row no-gutters">
