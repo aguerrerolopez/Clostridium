@@ -74,7 +74,7 @@ class Session {
      * @return string Session token
      */
     private static function generateToken(): string {
-        return strtr(base64_encode(random_bytes(42)), '+/', '-_');
+        return Crypto::getRandomString(56);
     }
 
     /**
