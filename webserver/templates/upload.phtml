@@ -122,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Build response
     $report = '';
+    $errorsCount = count($errors);
     if ($validSamplesCount > 0) {
         $message = ($validSamplesCount == 1) ?
             'Successfully imported 1 sample' :
@@ -141,12 +142,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 '<em>' . $this->e($errorMessage) . '</em>' .
             '</div>';
     }
-    if (count($errors) > UPLOAD_MAX_ERRORS) {
-        $remainingIssues = count($errors) - UPLOAD_MAX_ERRORS;
-        $message = ($remainingIssues == 1) ?
+    if ($errorsCount > UPLOAD_MAX_ERRORS) {
+        $remainingErrors = $errorsCount - UPLOAD_MAX_ERRORS;
+        $message = ($remainingErrors == 1) ?
             '1 more error was omitted' :
-            "$remainingIssues more errors were omitted";
+            "$remainingErrors more errors were omitted";
         $report .= '<p class="my-2 small font-italic">' . $message . '</p>';
+    }
+    if ($validSamplesCount+$duplicateSamplesCount+$errorsCount < 1) {
+        $message = 'No samples were detected';
+        $report .= '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill"></i> ' . $message . '</div>';
     }
     Response::json([
         'success' => true,
