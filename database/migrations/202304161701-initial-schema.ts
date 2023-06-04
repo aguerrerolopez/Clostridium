@@ -32,4 +32,34 @@ export async function apply(db: Pool): Promise<void> {
             expires_at   DATETIME NOT NULL
         ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
     )
+    await db.query(
+        `CREATE TABLE uploads (
+            id          CHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+            batch_id    CHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+            account     INT UNSIGNED NOT NULL,
+            sample      BINARY(32) NOT NULL COMMENT 'samples.digest',
+            name        VARCHAR(200) CHARACTER SET utf8mb4 NOT NULL,
+            uploaded_at DATETIME NOT NULL,
+            UNIQUE (account, sample),
+            INDEX (uploaded_at)
+        ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
+    )
+    await db.query(
+        `CREATE TABLE samples (
+            digest                   BINARY(32) NOT NULL PRIMARY KEY COMMENT 'Custom SHA-256 digest of contents',
+            sample_id                BINARY(16) NOT NULL COMMENT 'External, as reported by the sample',
+            target_id                BINARY(16) NOT NULL,
+            position                 CHAR(3) CHARACTER SET ascii NOT NULL,
+            instrument_serial_number VARCHAR(20) CHARACTER SET ascii NOT NULL,
+            instrument_type          TINYINT UNSIGNED NOT NULL,
+            digitizer_type           TINYINT UNSIGNED NOT NULL,
+            flexcontrol_version      VARCHAR(20) CHARACTER SET ascii NOT NULL,
+            aida_version             VARCHAR(20) CHARACTER SET ascii NOT NULL,
+            size                     INT UNSIGNED NOT NULL COMMENT 'In bytes, of the ZIP archive',
+            acquired_at              DATETIME(3) NOT NULL,
+            calibrated_at            DATETIME(3) NOT NULL,
+            INDEX (instrument_serial_number),
+            INDEX (acquired_at)
+        ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
+    )
 }

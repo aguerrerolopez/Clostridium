@@ -26,6 +26,19 @@ class Response {
     }
 
     /**
+     * Return JSON response
+     *
+     * @param array $data Response data
+     * @param int   $code Status code
+     */
+    public static function json(array $data, int $code = 200): never {
+        http_response_code($code);
+        header('Content-Type: application/json');
+        echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
      * HTML response
      *
      * @param string              $template Template name

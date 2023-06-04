@@ -39,9 +39,12 @@ services:
       DB_NAME: 'appdb'
       DB_USER: 'appuser'
       DB_PASS: ''
+      SAMPLES_DATA_DIR: /data
       MAILGUN_DOMAIN: ${MAILGUN_DOMAIN:-}
       MAILGUN_FROM: ${MAILGUN_FROM:-}
       MAILGUN_APIKEY: ${MAILGUN_APIKEY:-}
       TZ: ${TZ:-UTC}
+    volumes:
+      - ${SAMPLES_DATA_DIR:?}:/data
     ports:
       - 80:80

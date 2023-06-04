@@ -1,12 +1,157 @@
 <?php
+use App\Bruker\FlexArchive;
+use App\Utils\Crypto;
+use App\Utils\DB;
+use App\Utils\Response;
 use App\Utils\Session;
+use App\Utils\Storage;
 
-// Session::requireAuth(); // TODO: uncomment
+Session::requireAuth();
+$accountId = Session::getAccountId();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // TODO: not implemented
-    var_dump($_FILES);
-    exit;
+    // Finish processing upload even if client disconnects
+    ignore_user_abort(true);
+    set_time_limit(60*3);
+
+    // Get temporary path to uploaded file
+    $file = $_FILES['samples'] ?? null;
+    if ($file === null || $file['error'] !== UPLOAD_ERR_OK) {
+        Response::json([
+            'success' => false,
+            'error' => 'Invalid uploaded file',
+        ], 400);
+    }
+    $tmpPath = $file['tmp_name'];
+
+    // Try to open ZIP archive
+    try {
+        $archive = new FlexArchive($tmpPath);
+    } catch (RuntimeException $e) {
+        Response::json([
+            'success' => false,
+            'error' => 'Failed to read uploaded file',
+        ], 400);
+    }
+
+    // Extract samples
+    $validSamplesCount = 0;
+    $duplicateSamplesCount = 0;
+    $errors = [];
+    $batchId = Crypto::getRandomString(16);
+    foreach ($archive->getSamples() as $sample) {
+        $basePath = $sample->getBasePath();
+        try {
+            $sample->validate();
+
+            // Persist sample file and metadata
+            $digest = $sample->getDigest();
+            $destPath = Storage::getPathToSample($digest);
+            if (!is_file($destPath)) {
+                $destDirname = dirname($destPath);
+                if (!is_dir($destDirname)) {
+                    mkdir($destDirname, 0777, true);
+                }
+                $sample->export($destPath);
+                $filesize = filesize($destPath);
+                DB::query(
+                    'INSERT INTO samples (digest, sample_id, target_id, position, instrument_serial_number,
+                       instrument_type, digitizer_type, flexcontrol_version, aida_version, size, acquired_at,
+                       calibrated_at)
+                     VALUES (x?s, x?s, x?s, ?s, ?s, ?i, ?i, ?s, ?s, ?i, ?s, ?s)
+                     ON DUPLICATE KEY UPDATE
+                       sample_id=VALUES(sample_id),
+                       target_id=VALUES(target_id),
+                       position=VALUES(position),
+                       instrument_serial_number=VALUES(instrument_serial_number),
+                       instrument_type=VALUES(instrument_type),
+                       digitizer_type=VALUES(digitizer_type),
+                       flexcontrol_version=VALUES(flexcontrol_version),
+                       aida_version=VALUES(aida_version),
+                       size=VALUES(size),
+                       acquired_at=VALUES(acquired_at),
+                       calibrated_at=VALUES(calibrated_at)',
+                    $digest,
+                    $sample->getSampleId(),
+                    $sample->getTargetId(),
+                    $sample->getPosition(),
+                    $sample->getInstrumentSerialNumber(),
+                    $sample->getInstrumentType(),
+                    $sample->getDigitizerType(),
+                    $sample->getFlexControlVersion(),
+                    $sample->getAidaVersion(),
+                    $filesize,
+                    $sample->getAcquisitionDate()->format('Y-m-d H:i:s.u'),
+                    $sample->getCalibrationDate()->format('Y-m-d H:i:s.u')
+                );
+            }
+
+            // Find best default name for upload
+            $name = preg_replace('/\/0_[A-Z][0-9]+\/([0-9]+)\/1SLin$/', '#$1', $basePath); // Trim "0_A1/1/1SLin"
+            $name = explode('/', $name);
+            if (mb_strlen(end($name)) >= 5) {
+                $name = end($name);
+            } else {
+                $name = implode('/', array_slice($name, -2)); // Too short, keep 2 parts
+            }
+            $name = preg_replace('/#1$/', '', $name); // Trim "#1" (only keep "#2", "#3", etc.)
+            $name = mb_substr($name, 0, UPLOAD_NAME_MAX_LENGTH);
+
+            // Persist upload metadata
+            $uploadId = Crypto::getRandomString(16);
+            $insertedRows = DB::query(
+                'INSERT INTO uploads (id, batch_id, account, sample, name, uploaded_at)
+                 VALUES (?s, ?s, ?i, x?s, ?s, ?s)
+                 ON DUPLICATE KEY UPDATE id=id',
+                $uploadId,
+                $batchId,
+                $accountId,
+                $digest,
+                $name,
+                gmdate('Y-m-d H:i:s')
+            )->rowCount();
+            if ($insertedRows == 1) {
+                $validSamplesCount++;
+            } else {
+                $duplicateSamplesCount++;
+            }
+        } catch (RuntimeException $e) {
+            $errors[$basePath] = $e->getMessage();
+        }
+    }
+
+    // Build response
+    $report = '';
+    if ($validSamplesCount > 0) {
+        $message = ($validSamplesCount == 1) ?
+            'Successfully imported 1 sample' :
+            "Successfully imported $validSamplesCount samples";
+        $report .= '<div class="alert alert-success"><i class="bi bi-check-square-fill"></i> ' . $message . '</div>';
+    }
+    if ($duplicateSamplesCount > 0) {
+        $message = ($duplicateSamplesCount == 1) ?
+            'Skipped 1 duplicate sample' :
+            "Skipped $duplicateSamplesCount duplicate samples";
+        $report .= '<div class="alert alert-info"><i class="bi bi-info-square-fill"></i> ' . $message . '</div>';
+    }
+    foreach (array_slice($errors, 0, UPLOAD_MAX_ERRORS, true) as $basePath=>$errorMessage) {
+        $message = sprintf('Skipped "%s"', $basePath);
+        $report .= '<div class="alert alert-danger">' .
+                '<i class="bi bi-exclamation-octagon-fill"></i> ' . $this->e($message) . ' – ' .
+                '<em>' . $this->e($errorMessage) . '</em>' .
+            '</div>';
+    }
+    if (count($errors) > UPLOAD_MAX_ERRORS) {
+        $remainingIssues = count($errors) - UPLOAD_MAX_ERRORS;
+        $message = ($remainingIssues == 1) ?
+            '1 more error was omitted' :
+            "$remainingIssues more errors were omitted";
+        $report .= '<p class="my-2 small font-italic">' . $message . '</p>';
+    }
+    Response::json([
+        'success' => true,
+        'report' => $report,
+    ]);
 }
 ?>
 
@@ -18,18 +163,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="upload-area my-3 text-muted">
                 <div class="feedback feedback-initial">
                     <div class="icon"><i class="bi bi-upload"></i></div>
-                    <p>Drag and drop your samples or click to <span class="text-primary">open a browse dialog</span></p>
+                    <p class="heading">Drag and drop your samples or click to <span class="text-primary">open a browse dialog</span></p>
                 </div>
                 <div class="feedback feedback-error text-danger d-none">
                     <div class="icon"><i class="bi bi-exclamation-diamond"></i></div>
-                    <p></p>
+                    <p class="heading"></p>
                     <button type="button" class="btn btn-sm btn-outline-secondary">Try again</button>
                 </div>
                 <div class="feedback feedback-uploading d-none">
-                    <p></p>
+                    <p class="heading"></p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
                     </div>
+                </div>
+                <div class="feedback feedback-done d-none">
+                    <div class="icon"><i class="bi bi-archive"></i></div>
+                    <p class="heading">Upload completed</p>
+                    <div class="report my-4"></div>
+                    <p class="my-2">
+                        <a href="/results" class="btn btn-sm btn-primary">Go to results</a>
+                        <a href="/upload" class="btn btn-sm btn-outline-secondary">Upload more samples</a>
+                    </p>
                 </div>
             </div>
         </div>

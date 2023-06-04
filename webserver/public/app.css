@@ -26,8 +26,8 @@ form.wide-form h3 {
 /* Upload samples */
 .upload-area {
     display: flex;
-    height: 20rem;
-    padding: 2rem 3rem;
+    min-height: 20rem;
+    padding: 2rem 1rem;
     border: dashed 2px #6c757d;
     border-radius: 0.4rem;
     align-items: center;
@@ -38,7 +38,7 @@ form.wide-form h3 {
 
 @media (max-width: 575.98px) {
     .upload-area {
-        height: auto;
+        min-height: auto;
     }
 }
 
@@ -56,8 +56,15 @@ form.wide-form h3 {
 
 .upload-area .feedback {
     max-width: 18rem;
-    font-weight: 500;
     text-align: center;
+}
+
+.upload-area .feedback.feedback-done {
+    max-width: none;
+}
+
+.upload-area .feedback p.heading {
+    font-weight: 500;
 }
 
 .upload-area .feedback .icon {
@@ -69,6 +76,22 @@ form.wide-form h3 {
 .upload-area .feedback .progress {
     width: 15rem;
     height: 0.5rem;
+}
+
+.upload-area .feedback .progress-bar {
+    transition-duration: 0.2s;
+}
+
+.upload-area .feedback .alert {
+    margin: 0.2rem 0;
+    padding: 0.4rem 0.6rem;
+    font-size: 90%;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.upload-area .feedback .alert i {
+    margin-right: 0.3rem;
 }
 
 .upload-tip {

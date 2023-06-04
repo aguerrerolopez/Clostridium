@@ -124,7 +124,7 @@ class FlexSample {
     /**
      * Get sample ID
      *
-     * @return string Sample ID
+     * @return string Sample ID as hexadecimal string
      * @throws RuntimeException if failed to extract metadata
      */
     public function getSampleId(): string {
@@ -139,7 +139,7 @@ class FlexSample {
     /**
      * Get target ID
      *
-     * @return string Target ID
+     * @return string Target ID as hexadecimal string
      * @throws RuntimeException if failed to extract metadata
      */
     public function getTargetId(): string {
@@ -284,7 +284,7 @@ class FlexSample {
     /**
      * Get digest of sample contents
      *
-     * @return string SHA-256 digest in hexadecimal
+     * @return string SHA-256 digest as hexadecimal string
      */
     public function getDigest(): string {
         // Sort paths of files in sample (to be deterministic)

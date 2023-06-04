@@ -79,8 +79,9 @@
          * @param {File} file File instance
          */
         var uploadFile = function(file) {
-            var uploadMessage = 'Uploading...';
-            showFeedbackUploading(uploadMessage, 0);
+            var UPLOADING_MESSAGE = 'Uploading...';
+            var PROCESSING_MSG = 'Processing...';
+            showFeedbackUploading(UPLOADING_MESSAGE, 0);
 
             // Fix progress bar in IE
             if (isInternetExplorer) {
@@ -101,13 +102,17 @@
                     xhr.upload.addEventListener('progress', function(e) {
                         if (e.lengthComputable) {
                             var progress = (e.loaded / e.total) * 100;
-                            showFeedbackUploading(uploadMessage, progress);
+                            var message = (progress < 100) ? UPLOADING_MESSAGE : PROCESSING_MSG;
+                            showFeedbackUploading(message, progress);
                         }
                     }, false);
                     return xhr;
                 }
             }).done(function(data) {
-                // TODO
+                var $feedbackDone = $uploadArea.find('.feedback-done');
+                $feedbackDone.find('.report').html(data.report);
+                $uploadArea.find('.feedback-uploading').addClass('d-none');
+                $feedbackDone.removeClass('d-none');
             }).fail(function(e) {
                 if (e.status === 413) {
                     showFeedbackError('The uploaded file is too large');
@@ -151,7 +156,7 @@
          */
         var showFeedbackError = function(message) {
             $uploadArea.find('.feedback-initial, .feedback-uploading').addClass('d-none');
-            $uploadArea.find('.feedback-error p').html(message);
+            $uploadArea.find('.feedback-error p.heading').html(message);
             $uploadArea.find('.feedback-error').removeClass('d-none');
         };
 
@@ -161,7 +166,7 @@
          */
         var showFeedbackUploading = function(message, progress) {
             $uploadArea.find('.feedback-initial').addClass('d-none');
-            $uploadArea.find('.feedback-uploading p').html(message);
+            $uploadArea.find('.feedback-uploading p.heading').html(message);
             $uploadArea.find('.feedback-uploading .progress-bar').css('width', progress+'%');
             $uploadArea.find('.feedback-uploading').removeClass('d-none');
         };

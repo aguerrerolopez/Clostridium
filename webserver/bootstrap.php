@@ -15,6 +15,9 @@ const EMAIL_VERIFICATION_LIFETIME = 60*60*24; // 1 day (before it expires)
 
 const PASSWORD_RESET_LIFETIME = 60*60*5; // 5 hours (before it expires and requesting a new one)
 
+const UPLOAD_NAME_MAX_LENGTH = 200;
+const UPLOAD_MAX_ERRORS = 20; // Maximum errors to show in upload page
+
 const SESSION_COOKIE_NAME = 'sess';
 const SESSION_REFRESH_LIFETIME = 60*60*24*7; // 7 days
 const SESSION_EXPIRATION_LIFETIME = 60*60*24*30; // 30 days
