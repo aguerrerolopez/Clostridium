@@ -34,6 +34,7 @@ Before analysis, we extract the following metadata from a sample:
 | Instrument type                            | `##$InstTyp` | *acqu* | 9                                     |
 | Digitizer type                             | `##$DIGTYP`  | *acqu* | 19                                    |
 | Sample position (aka "pocillo")            | `##$PATCHNO` | *acqu* | E1                                    |
+| Original save path                         | `##$PATH`    | *acqu* | C:\Users\Admin\example\0_E1\1\1SLin   |
 | flexControl version (acquisition software) | `##$FCVer`   | *acqu* | flexControl 3.4.207.20                |
 | AIDA version (calibration software)        | `##$Acquver` | *proc* | AIDA4.7.373.7                         |
 | Calibration date                           | `##$CLDATE`  | *proc* | 2023-02-21T08:58:28.000+00:00         |

@@ -87,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Find best default name for upload
-            $name = preg_replace('/\/0_[A-Z][0-9]+\/([0-9]+)\/1SLin$/', '#$1', $basePath); // Trim "0_A1/1/1SLin"
+            $name = empty($basePath) ? $sample->getOriginalPath() : $basePath;
+            $name = preg_replace('/\/0_[A-Z][0-9]+\/([0-9]+)\/1SLin$/', '#$1', $name); // Trim "0_A1/1/1SLin"
             $name = explode('/', $name);
             if (mb_strlen(end($name)) >= 5) {
                 $name = end($name);

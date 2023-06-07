@@ -62,7 +62,7 @@ class FlexArchive {
             $node = $index;
 
             // Find entrypoint for samples by targeting "acqu" files
-            if (str_ends_with($path, '/acqu')) {
+            if ($path === 'acqu' || str_ends_with($path, '/acqu')) {
                 $basePath = mb_substr($path, 0, -5);
                 $entrypoints[$basePath] =& $parentNode;
             }

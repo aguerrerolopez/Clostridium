@@ -231,6 +231,22 @@ class FlexSample {
     }
 
     /**
+     * Get path where sample was originally saved to
+     *
+     * @return string Original path
+     * @throws RuntimeException if failed to extract metadata
+     */
+    public function getOriginalPath(): string {
+        $path = $this->getMetadata('acqu', '$PATH');
+        $path = trim($path);
+        if (empty($path)) {
+            throw new RuntimeException('Invalid sample path ($PATH)');
+        }
+        $path = str_replace('\\', '/', $path);
+        return $path;
+    }
+
+    /**
      * Get flexControl version
      *
      * @return string flexControl version
@@ -337,6 +353,7 @@ class FlexSample {
         $this->getInstrumentType();
         $this->getDigitizerType();
         $this->getPosition();
+        $this->getOriginalPath();
         $this->getFlexControlVersion();
 
         // Validate calibration metadata
