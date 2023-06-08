@@ -137,3 +137,17 @@ table.results-table .btn.btn-xs {
 table.results-table .btn.btn-xs:hover {
     border-color: #6c757d;
 }
+
+table.results-table .anim-breathing {
+    animation: breathing 1s ease-in-out infinite alternate;
+}
+
+@keyframes breathing {
+    0% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

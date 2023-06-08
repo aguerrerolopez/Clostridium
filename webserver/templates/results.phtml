@@ -1,7 +1,36 @@
 <?php
+use App\Utils\DB;
 use App\Utils\Session;
 
 Session::requireAuth();
+$accountId = Session::getAccountId();
+
+// Prepare pagination
+$totalResults = DB::getOne(
+    'SELECT COUNT(u.id)
+     FROM uploads u
+     WHERE u.account=?i',
+    $accountId
+);
+$resultsPerPage = intval($_GET['limit'] ?? 0);
+if (!in_array($resultsPerPage, RESULTS_ALLOWED_LIMITS, true)) {
+    $resultsPerPage = RESULTS_ALLOWED_LIMITS[0];
+}
+$maxPage = ceil($totalResults / $resultsPerPage);
+$currentPage = min(max(intval($_GET['page'] ?? 0), 1), $maxPage);
+
+// Get results to show
+$results = DB::getAll(
+    'SELECT u.id, u.name, s.position, s.acquired_at
+     FROM uploads u
+     LEFT JOIN samples s ON s.digest=u.sample
+     WHERE u.account=?i
+     ORDER BY s.acquired_at DESC
+     LIMIT ?i, ?i',
+    $accountId,
+    $resultsPerPage*($currentPage-1),
+    $resultsPerPage
+);
 ?>
 
 <?php $this->layout('base', ['title' => 'Results']) ?>
@@ -62,62 +91,40 @@ Session::requireAuth();
                     <th scope="col" class="text-nowrap">Acquired At</th>
                     <th scope="col" class="text-nowrap"><abbr title="Decision Tree">DT</abbr></th>
                     <th scope="col" class="text-nowrap"><abbr title="Random Forest">RF</abbr></th>
-                    <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FA-VAE</abbr></th>
+                    <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FAVAE</abbr></th>
                     <th scope="col" class="text-nowrap"><abbr title="Dual Bayesian Logistic Regressor">DBLR</abbr></th>
                     <th scope="col" class="text-nowrap">Actual</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="sample-0">
-                            <label class="custom-control-label" for="sample-0"></label>
-                        </div>
-                    </td>
-                    <td><a href="/results/aaaa">23051234</a></td>
-                    <td>E2</td>
-                    <td>2023-05-12 12:47</td>
-                    <td>RT027 <span class="badge badge-pill badge-warning">67%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">99%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">90%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">96%</span></td>
-                    <td>
-                        <select class="form-control form-control-sm">
-                            <option selected disabled>Add...</option>
-                            <option>RT027</option>
-                        </select>
-                    </td>
-                    <td class="col-buttons text-nowrap">
-                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
-                        <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="sample-1">
-                            <label class="custom-control-label" for="sample-1"></label>
-                        </div>
-                    </td>
-                    <td><a href="/results/aaaa">Clostridium difficile 239121-027/D3</a></td>
-                    <td>E1</td>
-                    <td>2023-05-10 18:34</td>
-                    <td>RT027 <span class="badge badge-pill badge-warning">65%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">98%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">87%</span></td>
-                    <td>RT027 <span class="badge badge-pill badge-success">91%</span></td>
-                    <td>
-                        <select class="form-control form-control-sm">
-                            <option selected>RT027</option>
-                        </select>
-                    </td>
-                    <td class="col-buttons text-nowrap">
-                        <a title="Download" href="/results/aaaa/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
-                        <button type="button" title="Delete" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
-                    </td>
-                </tr>
+                <?php foreach ($results as $index=>$result) { ?>
+                    <tr>
+                        <td>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>">
+                                <label class="custom-control-label" for="sample-<?= $index ?>"></label>
+                            </div>
+                        </td>
+                        <td><a href="/results/<?= $result['id'] ?>"><?= $this->e($result['name']) ?></a></td>
+                        <td><?= $result['position'] ?></td>
+                        <td><?= $result['acquired_at'] // TODO: format date ?></td>
+                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                        <td>
+                            <select class="form-control form-control-sm">
+                                <option selected disabled>Add...</option>
+                                <option>RT027</option>
+                            </select>
+                        </td>
+                        <td class="col-buttons text-nowrap">
+                            <a title="Download sample" href="/results/<?= $result['id'] ?>/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                            <button type="button" title="Delete sample" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
+                        </td>
+                    </tr>
+                <?php } ?>
             </tbody>
         </table>
     </div>
