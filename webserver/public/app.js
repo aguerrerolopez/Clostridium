@@ -279,4 +279,9 @@
             $uploadArea.removeClass('locked');
         });
     }
+
+    /* Results page */
+    $('select.results-limit').on('change', function() {
+        document.location.href = $(this).val();
+    });
 })();

@@ -1,0 +1,70 @@
+<?php
+$MAX_CONSECUTIVE_PAGES = 5;
+$baseUrl = $url . (str_contains($url, '?') ? '&' : '?') . 'page=';
+?>
+
+<ul class="pagination pagination-sm">
+    <?php /* Previous page button */ ?>
+    <?php if ($currentPage == 1) { ?>
+        <li class="page-item disabled">
+            <span class="page-link" aria-label="Previous">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </span>
+        </li>
+    <?php } else { ?>
+        <li class="page-item">
+            <a class="page-link" href="<?= $baseUrl.($currentPage-1) ?>" aria-label="Previous">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </a>
+        </li>
+    <?php } ?>
+
+    <?php if ($currentPage < $MAX_CONSECUTIVE_PAGES) { // We're at the start ?>
+        <?php for ($page=1; $page<=min($MAX_CONSECUTIVE_PAGES, $maxPage); $page++) { ?>
+            <?php if ($page == $currentPage) { ?>
+                <li class="page-item active"><span class="page-link"><?= $page ?></span></li>
+            <?php } else { ?>
+                <li class="page-item"><a class="page-link" href="<?= $baseUrl.$page ?>"><?= $page ?></a></li>
+            <?php } ?>
+        <?php } ?>
+        <?php if ($maxPage-1 > $MAX_CONSECUTIVE_PAGES) { ?>
+            <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        <?php } ?>
+        <?php if ($maxPage > $MAX_CONSECUTIVE_PAGES) { ?>
+            <li class="page-item"><a class="page-link" href="<?= $baseUrl.$maxPage ?>"><?= $maxPage ?></a></li>
+        <?php } ?>
+    <?php } elseif (($maxPage-$currentPage+1) >= $MAX_CONSECUTIVE_PAGES) { // We're in the middle ?>
+        <li class="page-item"><a class="page-link" href="<?= $baseUrl ?>1">1</a></li>
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        <li class="page-item"><a class="page-link" href="<?= $baseUrl.($currentPage-1) ?>"><?= $currentPage-1 ?></a></li>
+        <li class="page-item active"><span class="page-link"><?= $currentPage ?></span></li>
+        <li class="page-item"><a class="page-link" href="<?= $baseUrl.($currentPage+1) ?>"><?= $currentPage+1 ?></a></li>
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        <li class="page-item"><a class="page-link" href="<?= $baseUrl.$maxPage ?>"><?= $maxPage ?></a></li>
+    <?php } else { // We're at the end ?>
+        <li class="page-item"><a class="page-link" href="<?= $baseUrl ?>1">1</a></li>
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        <?php for ($page=$maxPage-$MAX_CONSECUTIVE_PAGES+1; $page<=$maxPage; $page++) { ?>
+            <?php if ($page == $currentPage) { ?>
+                <li class="page-item active"><span class="page-link"><?= $page ?></span></li>
+            <?php } else { ?>
+                <li class="page-item"><a class="page-link" href="<?= $baseUrl.$page ?>"><?= $page ?></a></li>
+            <?php } ?>
+        <?php } ?>
+    <?php } ?>
+
+    <?php /* Next page button */ ?>
+    <?php if ($currentPage == $maxPage) { ?>
+        <li class="page-item disabled">
+            <span class="page-link" aria-label="Next">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </span>
+        </li>
+    <?php } else { ?>
+        <li class="page-item">
+            <a class="page-link" href="<?= $baseUrl.($currentPage+1) ?>" aria-label="Next">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </a>
+        </li>
+    <?php } ?>
+</ul>
