@@ -300,7 +300,7 @@
             maxDate: moment().add(1, 'days'),
             autoApply: true,
             locale: {
-                format: 'DD/MM/YYYY',
+                format: 'YYYY-MM-DD',
                 firstDay: 1
             }
         }, function(from, to) {
@@ -311,6 +311,12 @@
         // Handle change number results per page
         $('select.results-limit').on('change', function() {
             document.location.href = $(this).val();
+        });
+
+        // Format dates in client's timezone
+        $('.results-table time').each(function() {
+            var $this = $(this);
+            $this.text(moment.unix($this.attr('datetime')).format('YYYY-MM-DD HH:mm:ss'));
         });
     }
 })();

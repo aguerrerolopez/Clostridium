@@ -151,7 +151,8 @@ if ($totalResults > 0) {
                             </td>
                             <td><a href="/results/<?= $result['id'] ?>"><?= $this->e($result['name']) ?></a></td>
                             <td><?= $result['position'] ?></td>
-                            <td><?= $result['acquired_at'] // TODO: format date ?></td>
+                            <?php $acquiredAtTimestamp = strtotime($result['acquired_at']) ?>
+                            <td><time datetime="<?= $acquiredAtTimestamp ?>"><?= date('Y-m-d H:i:s', $acquiredAtTimestamp) ?></time></td>
                             <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
                             <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
                             <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
