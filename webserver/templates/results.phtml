@@ -1,36 +1,71 @@
 <?php
 use App\Utils\DB;
+use App\Utils\Http;
 use App\Utils\Session;
 
 Session::requireAuth();
 $accountId = Session::getAccountId();
 
+// Prepare filters
+$fromTimestamp = null;
+$toTimestamp = null;
+if (!empty($_GET['from']) || !empty($_GET['to'])) {
+    $fromTimestamp = intval($_GET['from'] ?? 0);
+    $toTimestamp = intval($_GET['to'] ?? 0);
+}
+$ribotype = strval($_GET['ribotype'] ?? '');
+if ($ribotype !== 'unlabeled' && !in_array($ribotype, RESULTS_ALLOWED_RIBOTYPES, true)) {
+    $ribotype = null;
+}
+$name = trim(strval($_GET['name'] ?? ''));
+if (empty($name)) {
+    $name = null;
+}
+
+// Prepare WHERE clause for query
+$whereClause = DB::parse('WHERE u.account=?i', $accountId);
+if ($fromTimestamp !== null) {
+    $whereClause .= DB::parse(' AND s.acquired_at>=?s', gmdate('Y-m-d 00:00:00.000', $fromTimestamp));
+}
+if ($toTimestamp !== null) {
+    $whereClause .= DB::parse(' AND s.acquired_at<=?s', gmdate('Y-m-d 23:59:59.999', $toTimestamp));
+}
+// TODO: filter by $ribotype
+if ($name !== null) {
+    $escapedName = addcslashes($name, '%_');
+    $whereClause .= DB::parse(' AND u.name LIKE ?s', "%$escapedName%");
+}
+
 // Prepare pagination
 $totalResults = DB::getOne(
     'SELECT COUNT(u.id)
      FROM uploads u
-     WHERE u.account=?i',
-    $accountId
+     LEFT JOIN samples s ON s.digest=u.sample
+     ?p',
+    $whereClause
 );
 $resultsPerPage = intval($_GET['limit'] ?? 0);
 if (!in_array($resultsPerPage, RESULTS_ALLOWED_LIMITS, true)) {
-    $resultsPerPage = RESULTS_ALLOWED_LIMITS[0];
+    $resultsPerPage = RESULTS_DEFAULT_LIMIT;
 }
 $maxPage = ceil($totalResults / $resultsPerPage);
 $currentPage = min(max(intval($_GET['page'] ?? 0), 1), $maxPage);
 
 // Get results to show
-$results = DB::getAll(
-    'SELECT u.id, u.name, s.position, s.acquired_at
-     FROM uploads u
-     LEFT JOIN samples s ON s.digest=u.sample
-     WHERE u.account=?i
-     ORDER BY s.acquired_at DESC
-     LIMIT ?i, ?i',
-    $accountId,
-    $resultsPerPage*($currentPage-1),
-    $resultsPerPage
-);
+$results = [];
+if ($totalResults > 0) {
+    $results = DB::getAll(
+        'SELECT u.id, u.name, s.position, s.acquired_at
+         FROM uploads u
+         LEFT JOIN samples s ON s.digest=u.sample
+         ?p
+         ORDER BY s.acquired_at DESC
+         LIMIT ?i, ?i',
+        $whereClause,
+        $resultsPerPage*($currentPage-1),
+        $resultsPerPage
+    );
+}
 ?>
 
 <?php $this->layout('base', ['title' => 'Results']) ?>
@@ -39,33 +74,40 @@ $results = DB::getAll(
     <?php $this->insert('partials/verify-email-alert') ?>
     <div class="row mt-3 mb-4">
         <div class="col-lg-7">
-            <form class="row no-gutters">
+            <form action="/results" method="get" class="results-filters row no-gutters">
                 <div class="col-md">
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                         </div>
-                        <input class="form-control" type="text" value="Last 7 days">
+                        <input class="form-control date-picker" type="text" readonly>
                     </div>
+                    <input type="hidden" name="from" value="<?= $fromTimestamp ?? '' ?>">
+                    <input type="hidden" name="to" value="<?= $toTimestamp ?? '' ?>">
                 </div>
-                <div class="col-md py-1 py-md-0 px-md-1">
-                    <select class="custom-select custom-select-sm">
-                        <option selected>All ribotypes</option>
-                        <option value="1">RT-027</option>
+                <div class="col-md-3 py-1 py-md-0 px-md-1">
+                    <select name="ribotype" class="custom-select custom-select-sm">
+                        <option value=""<?= $ribotype === null ? ' selected' : '' ?>>All ribotypes</option>
+                        <option value="unlabeled"<?= $ribotype === 'unlabeled' ? ' selected' : '' ?>>Unlabeled</option>
+                        <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $item) { ?>
+                            <option value="<?= $item ?>"<?= $ribotype === $item ? ' selected' : '' ?>><?= $item ?></option>
+                        <?php } ?>
                     </select>
                 </div>
-                <div class="col-md">
+                <div class="d-flex col-md-5">
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                         </div>
-                        <input class="form-control" type="text">
+                        <input type="text" name="name" value="<?= $this->e($name ?? '') ?>" class="form-control">
                     </div>
+                    <button type="submit" class="btn btn-sm btn-primary ml-1">Apply</button>
                 </div>
+                <input type="hidden" name="limit" value="<?= $resultsPerPage ?>">
             </form>
         </div>
         <div class="col-lg-5 d-flex align-items-center justify-content-end mt-2 mt-lg-0">
-            <small class="text-muted">2 samples selected</small>
+            <small class="text-muted">0 samples selected</small> <!-- // TODO: not implemented -->
             <button type="button" class="btn btn-sm btn-info ml-2">
                 <i class="bi bi-cloud-arrow-down-fill"></i>
                 <span class="d-none d-sm-inline">Download ZIP</span>
@@ -76,71 +118,103 @@ $results = DB::getAll(
             </button>
         </div>
     </div>
-    <div class="table-responsive">
-        <table class="results-table table table-sm table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="all-samples">
-                            <label class="custom-control-label" for="all-samples"></label>
-                        </div>
-                    </th>
-                    <th scope="col" class="col-name">Name</th>
-                    <th scope="col">Position</th>
-                    <th scope="col" class="text-nowrap">Acquired At</th>
-                    <th scope="col" class="text-nowrap"><abbr title="Decision Tree">DT</abbr></th>
-                    <th scope="col" class="text-nowrap"><abbr title="Random Forest">RF</abbr></th>
-                    <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FAVAE</abbr></th>
-                    <th scope="col" class="text-nowrap"><abbr title="Dual Bayesian Logistic Regressor">DBLR</abbr></th>
-                    <th scope="col" class="text-nowrap">Actual</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($results as $index=>$result) { ?>
+    <?php if ($totalResults > 0) { ?>
+        <div class="table-responsive">
+            <table class="results-table table table-sm table-hover">
+                <thead>
                     <tr>
-                        <td>
+                        <th scope="col">
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>">
-                                <label class="custom-control-label" for="sample-<?= $index ?>"></label>
+                                <input type="checkbox" class="custom-control-input" id="all-samples">
+                                <label class="custom-control-label" for="all-samples"></label>
                             </div>
-                        </td>
-                        <td><a href="/results/<?= $result['id'] ?>"><?= $this->e($result['name']) ?></a></td>
-                        <td><?= $result['position'] ?></td>
-                        <td><?= $result['acquired_at'] // TODO: format date ?></td>
-                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
-                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
-                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
-                        <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
-                        <td>
-                            <select class="form-control form-control-sm">
-                                <option selected disabled>Add...</option>
-                                <option>RT027</option>
-                            </select>
-                        </td>
-                        <td class="col-buttons text-nowrap">
-                            <a title="Download sample" href="/results/<?= $result['id'] ?>/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
-                            <button type="button" title="Delete sample" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
-                        </td>
+                        </th>
+                        <th scope="col" class="col-name">Name</th>
+                        <th scope="col">Position</th>
+                        <th scope="col" class="text-nowrap">Acquired At</th>
+                        <th scope="col" class="text-nowrap"><abbr title="Decision Tree">DT</abbr></th>
+                        <th scope="col" class="text-nowrap"><abbr title="Random Forest">RF</abbr></th>
+                        <th scope="col" class="text-nowrap"><abbr title="Factor Analysis Variational AutoEncoder">FAVAE</abbr></th>
+                        <th scope="col" class="text-nowrap"><abbr title="Dual Bayesian Logistic Regressor">DBLR</abbr></th>
+                        <th scope="col" class="text-nowrap">Actual</th>
+                        <th scope="col"></th>
                     </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($results as $index=>$result) { ?>
+                        <tr>
+                            <td>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>">
+                                    <label class="custom-control-label" for="sample-<?= $index ?>"></label>
+                                </div>
+                            </td>
+                            <td><a href="/results/<?= $result['id'] ?>"><?= $this->e($result['name']) ?></a></td>
+                            <td><?= $result['position'] ?></td>
+                            <td><?= $result['acquired_at'] // TODO: format date ?></td>
+                            <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                            <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                            <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                            <td><i class="bi bi-three-dots text-muted anim-breathing"></i></td>
+                            <td>
+                                <select class="form-control form-control-sm">
+                                    <option selected disabled>Add...</option>
+                                    <option>RT027</option>
+                                </select>
+                            </td>
+                            <td class="col-buttons text-nowrap">
+                                <a title="Download sample" href="/results/<?= $result['id'] ?>/download" class="btn btn-xs text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                                <button type="button" title="Delete sample" class="btn btn-xs text-danger"><i class="bi bi-trash-fill"></i></button>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between my-2 my-md-0">
+            <nav class="mr-1" aria-label="Results pagination">
+                <?php $this->insert('partials/pagination', [
+                    'currentPage' => $currentPage,
+                    'maxPage' => $maxPage,
+                    'url' => Http::buildUri('/results', [
+                        'from' => $fromTimestamp,
+                        'to' => $toTimestamp,
+                        'ribotype' => $ribotype,
+                        'name' => $name,
+                        'limit' => $resultsPerPage,
+                    ]),
+                ]) ?>
+            </nav>
+            <select class="results-limit custom-select custom-select-sm w-auto">
+                <?php foreach (RESULTS_ALLOWED_LIMITS as $limit) { ?>
+                    <?php $limitUrl = Http::buildUri('/results', [
+                        'from' => $fromTimestamp,
+                        'to' => $toTimestamp,
+                        'ribotype' => $ribotype,
+                        'name' => $name,
+                        'limit' => $limit,
+                    ]) ?>
+                    <option value="<?= $limitUrl ?>"<?= ($limit === $resultsPerPage) ? ' selected' : '' ?>><?= $limit ?></option>
                 <?php } ?>
-            </tbody>
-        </table>
-    </div>
-    <div class="d-flex flex-wrap justify-content-between my-2 my-md-0">
-        <nav class="mr-1" aria-label="Results pagination">
-            <?php $this->insert('partials/pagination', [
-                'currentPage' => $currentPage,
-                'maxPage' => $maxPage,
-                'url' => '/results', // TODO: add query args
-            ]) ?>
-        </nav>
-        <select class="results-limit custom-select custom-select-sm w-auto">
-            <?php foreach (RESULTS_ALLOWED_LIMITS as $limit) { ?>
-                <?php $limitUrl = "/results?limit=$limit"; // TODO: add query args ?>
-                <option value="<?= $limitUrl ?>"<?= ($limit === $resultsPerPage) ? ' selected' : '' ?>><?= $limit ?></option>
+            </select>
+        </div>
+    <?php } else { ?>
+        <div class="py-5 text-center">
+            <h3>No samples found</h3>
+            <?php if ($fromTimestamp === null && $ribotype === null && $name === null) { ?>
+                <p>Start by <a href="/upload">uploading your first samples</a> to analyse them</p>
+            <?php } else { ?>
+                <p>Try changing the search filters to something broader</p>
             <?php } ?>
-        </select>
-    </div>
+        </div>
+    <?php } ?>
 </div>
+
+<?php $this->push('styles') ?>
+    <link href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.css" rel="stylesheet">
+<?php $this->end() ?>
+
+<?php $this->push('scripts') ?>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.18.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+<?php $this->end() ?>

@@ -19,6 +19,8 @@ const UPLOAD_NAME_MAX_LENGTH = 200;
 const UPLOAD_MAX_ERRORS = 20; // Maximum errors to show in upload page
 
 const RESULTS_ALLOWED_LIMITS = [20, 50, 100, 500];
+const RESULTS_DEFAULT_LIMIT = 20;
+const RESULTS_ALLOWED_RIBOTYPES = ['RT027'];
 
 const SESSION_COOKIE_NAME = 'sess';
 const SESSION_REFRESH_LIFETIME = 60*60*24*7; // 7 days

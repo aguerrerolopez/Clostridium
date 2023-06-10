@@ -281,7 +281,36 @@
     }
 
     /* Results page */
-    $('select.results-limit').on('change', function() {
-        document.location.href = $(this).val();
-    });
+    var $resultsFilters = $('form.results-filters');
+    if ($resultsFilters.length > 0) {
+        var $fromInput = $resultsFilters.find('input[name="from"]');
+        var $toInput = $resultsFilters.find('input[name="to"]');
+
+        // Handle date picker
+        var $datePicker = $resultsFilters.find('.date-picker');
+        $datePicker.on('change', function() {
+            if ($fromInput.val() === '') {
+                $(this).val('Any date');
+            }
+        });
+        $datePicker.daterangepicker({
+            startDate: ($fromInput.val() === '') ? undefined : moment.unix($fromInput.val()),
+            endDate: ($toInput.val() === '') ? undefined : moment.unix($toInput.val()),
+            minYear: 2010,
+            maxDate: moment().add(1, 'days'),
+            autoApply: true,
+            locale: {
+                format: 'DD/MM/YYYY',
+                firstDay: 1
+            }
+        }, function(from, to) {
+            $fromInput.val(from.unix());
+            $toInput.val(to.unix());
+        });
+
+        // Handle change number results per page
+        $('select.results-limit').on('change', function() {
+            document.location.href = $(this).val();
+        });
+    }
 })();
