@@ -41,6 +41,7 @@ export async function apply(db: Pool): Promise<void> {
             name        VARCHAR(200) CHARACTER SET utf8mb4 NOT NULL,
             uploaded_at DATETIME NOT NULL,
             UNIQUE (account, sample),
+            INDEX (account),
             INDEX (uploaded_at)
         ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
     )
