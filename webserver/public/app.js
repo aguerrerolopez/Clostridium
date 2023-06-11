@@ -297,7 +297,7 @@
             startDate: ($fromInput.val() === '') ? undefined : moment.unix($fromInput.val()),
             endDate: ($toInput.val() === '') ? undefined : moment.unix($toInput.val()),
             minYear: 2010,
-            maxDate: moment().add(1, 'days'),
+            maxDate: moment().endOf('day'),
             autoApply: true,
             locale: {
                 format: 'YYYY-MM-DD',
