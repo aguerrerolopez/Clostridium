@@ -14,7 +14,7 @@ if (!empty($_GET['from']) || !empty($_GET['to'])) {
     $toTimestamp = intval($_GET['to'] ?? 0);
 }
 $ribotype = strval($_GET['ribotype'] ?? '');
-if ($ribotype !== 'unlabeled' && !in_array($ribotype, RESULTS_ALLOWED_RIBOTYPES, true)) {
+if ($ribotype !== 'unlabeled' && !isset(RESULTS_ALLOWED_RIBOTYPES[$ribotype])) {
     $ribotype = null;
 }
 $name = trim(strval($_GET['name'] ?? ''));
@@ -30,7 +30,11 @@ if ($fromTimestamp !== null) {
 if ($toTimestamp !== null) {
     $whereClause .= DB::parse(' AND s.acquired_at<=?s', gmdate('Y-m-d 23:59:59.999', $toTimestamp));
 }
-// TODO: filter by $ribotype
+if ($ribotype === 'unlabeled') {
+    $whereClause .= ' AND u.label IS NULL';
+} elseif ($ribotype !== null) {
+    $whereClause .= DB::parse(' AND u.label=?s', $ribotype);
+}
 if ($name !== null) {
     $escapedName = addcslashes($name, '%_');
     $whereClause .= DB::parse(' AND u.name LIKE ?s', "%$escapedName%");
@@ -89,8 +93,8 @@ if ($totalResults > 0) {
                     <select name="ribotype" class="custom-select custom-select-sm">
                         <option value=""<?= $ribotype === null ? ' selected' : '' ?>>All ribotypes</option>
                         <option value="unlabeled"<?= $ribotype === 'unlabeled' ? ' selected' : '' ?>>Unlabeled</option>
-                        <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $item) { ?>
-                            <option value="<?= $item ?>"<?= $ribotype === $item ? ' selected' : '' ?>><?= $item ?></option>
+                        <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $value=>$text) { ?>
+                            <option value="<?= $value ?>"<?= $ribotype == $value ? ' selected' : '' ?>><?= $text ?></option>
                         <?php } ?>
                     </select>
                 </div>
