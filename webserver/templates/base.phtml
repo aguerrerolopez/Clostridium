@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css" rel="stylesheet">
     <?= $this->section('styles') ?>
-    <link href="/app.css" rel="stylesheet">
+    <link href="/app.css?v=<?= urlencode(APP_VERSION) ?>" rel="stylesheet">
 </head>
 <body>
     <?php $this->insert('partials/topbar') ?>
@@ -19,6 +19,6 @@
     <script>window.Promise || document.write('<script src="/ie-polyfills.js"><\/script>')</script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <?= $this->section('scripts') ?>
-    <script src="/app.js"></script>
+    <script src="/app.js?v=<?= urlencode(APP_VERSION) ?>"></script>
 </body>
 </html>
