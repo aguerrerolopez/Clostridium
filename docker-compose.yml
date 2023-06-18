@@ -48,3 +48,18 @@ services:
       - ${SAMPLES_DATA_DIR:?}:/data
     ports:
       - 80:80
+
+  # Analyzer service
+  analyzer:
+    build:
+      context: ./analyzer
+      args:
+        PUID: ${PUID:-1000}
+        PGID: ${PGID:-1000}
+    restart: unless-stopped
+    stop_grace_period: 1m30s
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-UTC}

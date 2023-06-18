@@ -1,6 +1,7 @@
 # AutoCdiff
 
 ## Components
+- [🔍 Analyzer](./analyzer)
 - [💾 Database](./database)
 - [🪐 Webserver](./webserver)
 
