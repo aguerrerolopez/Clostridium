@@ -156,7 +156,7 @@ class FlexSample {
     /**
      * Get acquisition date
      *
-     * @return DateTime Adquisition date
+     * @return DateTime Acquisition date
      * @throws RuntimeException if failed to extract metadata
      */
     public function getAcquisitionDate(): DateTime {

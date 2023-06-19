@@ -4,7 +4,6 @@ namespace Tests\Bruker;
 use App\Bruker\FlexArchive;
 use App\Bruker\FlexSample;
 use DateTime;
-use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use ZipArchive;
