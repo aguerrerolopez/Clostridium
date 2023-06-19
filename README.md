@@ -11,6 +11,7 @@ The following environment variables are used to configure the app. The can be de
 ```py
 PUID=1000                                # Process UID for containers with mounted volumes
 PGID=1000                                # Process GID for containers with mounted volumes
+LOG_LEVEL="DEBUG"                        # Optional, defaults to "INFO"
 TZ="Europe/Madrid"                       # Only for logs (database always stores timestamps in UTC)
 SAMPLES_DATA_DIR="/path/to/samples/dir"  # Path to samples data directory (read-write)
 DB_DATA_DIR="/path/to/db/data/dir"       # Path to database data directory (read-write)

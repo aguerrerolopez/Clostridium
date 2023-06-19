@@ -63,4 +63,5 @@ services:
       database:
         condition: service_healthy
     environment:
+      LOG_LEVEL: ${LOG_LEVEL:-}
       TZ: ${TZ:-UTC}
