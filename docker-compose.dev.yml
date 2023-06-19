@@ -7,3 +7,8 @@ services:
   webserver:
     volumes:
       - ./webserver:/app:ro
+
+  # Analyzer service
+  analyzer:
+    volumes:
+      - ./analyzer/models:/app/models
