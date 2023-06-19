@@ -1,4 +1,4 @@
-FROM mariadb:10.11
+FROM mariadb:11.0
 ARG UNAME=database
 ARG PUID
 ARG PGID
@@ -6,7 +6,7 @@ ARG PGID
 # Install Node.js and Yarn
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates wget \
-    && wget -qO- https://deb.nodesource.com/setup_18.x | bash - \
+    && wget -qO- https://deb.nodesource.com/setup_20.x | bash - \
     && wget -qO- https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /etc/apt/trusted.gpg.d/yarn.gpg \
     && echo 'deb https://dl.yarnpkg.com/debian stable main' | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
@@ -28,5 +28,5 @@ USER $UNAME
 # Install app
 RUN yarn --cwd /app install --production
 
-# Change default command
-CMD ["/app/entrypoint.sh"]
+# Change default entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]

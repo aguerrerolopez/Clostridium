@@ -12,6 +12,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_DATABASE: 'appdb'
       MARIADB_AUTO_UPGRADE: 'yes'
+      MARIADB_DISABLE_UPGRADE_BACKUP: 'yes'
       DB_HOST: '127.0.0.1'
       DB_NAME: 'appdb'
       DB_USER: 'root'
