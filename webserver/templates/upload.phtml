@@ -55,14 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sample->export($destPath);
                 $filesize = filesize($destPath);
                 DB::query(
-                    'INSERT INTO samples (digest, sample_id, target_id, position, instrument_serial_number,
-                       instrument_type, digitizer_type, flexcontrol_version, aida_version, size, acquired_at,
-                       calibrated_at)
-                     VALUES (x?s, x?s, x?s, ?s, ?s, ?i, ?i, ?s, ?s, ?i, ?s, ?s)
+                    'INSERT INTO samples (digest, sample_id, target_id, position, spectrum_size,
+                       instrument_serial_number, instrument_type, digitizer_type, flexcontrol_version, aida_version,
+                       size, acquired_at, calibrated_at)
+                     VALUES (x?s, x?s, x?s, ?s, ?i, ?s, ?i, ?i, ?s, ?s, ?i, ?s, ?s)
                      ON DUPLICATE KEY UPDATE
                        sample_id=VALUES(sample_id),
                        target_id=VALUES(target_id),
                        position=VALUES(position),
+                       spectrum_size=VALUES(spectrum_size),
                        instrument_serial_number=VALUES(instrument_serial_number),
                        instrument_type=VALUES(instrument_type),
                        digitizer_type=VALUES(digitizer_type),
@@ -75,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sample->getSampleId(),
                     $sample->getTargetId(),
                     $sample->getPosition(),
+                    $sample->getSpectrumSize(),
                     $sample->getInstrumentSerialNumber(),
                     $sample->getInstrumentType(),
                     $sample->getDigitizerType(),

@@ -26,6 +26,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('16824b6eacf14b9d861cd7d18b6a1237',           $sample->getSampleId());
         $this->assertEquals('fe4feffa0c054941b01db2dedef2f95f',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2023-02-22T12:47:40.909+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_406,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -41,6 +42,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('d7dca0effaf247d2abb86188f4e635ed',           $sample->getSampleId());
         $this->assertEquals('fe4feffa0c054941b01db2dedef2f95f',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2023-02-22T12:47:45.482+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_406,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -56,6 +58,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('04d447db393d422981e8c10c90ec09b2',           $sample->getSampleId());
         $this->assertEquals('fe4feffa0c054941b01db2dedef2f95f',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2023-02-22T12:47:50.935+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_406,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -71,6 +74,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('fb60fc50f99942bba40e0bcc5e262e1d',           $sample->getSampleId());
         $this->assertEquals('fe4feffa0c054941b01db2dedef2f95f',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2023-02-22T12:48:05.828+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_406,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -86,6 +90,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('ce9421f2726c4c5aa68dd08a4b61477d',           $sample->getSampleId());
         $this->assertEquals('649ec898d5e94625973438813e13596c',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2020-03-15T18:34:25.353+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_394,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -101,6 +106,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('ddd4be612b6d42b9ada6e4df0634db79',           $sample->getSampleId());
         $this->assertEquals('649ec898d5e94625973438813e13596c',           $sample->getTargetId());
         $this->assertEquals(new DateTime('2020-03-15T18:34:41.306+0100'), $sample->getAcquisitionDate());
+        $this->assertEquals(21_394,                                       $sample->getSpectrumSize());
         $this->assertEquals('8604832.05252',                              $sample->getInstrumentSerialNumber());
         $this->assertEquals(9,                                            $sample->getInstrumentType());
         $this->assertEquals(19,                                           $sample->getDigitizerType());
@@ -124,6 +130,15 @@ final class FlexArchiveTest extends TestCase {
     public function testThrowsExceptionForInvalidArchives(): void {
         $this->expectException(RuntimeException::class);
         new FlexArchive(__DIR__ . '/samples-invalid.rar');
+    }
+
+    public function testThrowsExceptionForInvalidSingleSample(): void {
+        $archive = new FlexArchive(__DIR__ . '/samples-invalid-single.zip');
+        $samples = [...$archive->getSamples()];
+        $this->assertEquals(1, count($samples), 'Invalid count of samples');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Invalid size of spectrum file ("fid")');
+        $samples[0]->validate();
     }
 
     public function testExportsSampleToZipArchive(): void {

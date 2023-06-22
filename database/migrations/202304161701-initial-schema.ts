@@ -54,6 +54,7 @@ export async function apply(db: Pool): Promise<void> {
             sample_id                BINARY(16) NOT NULL COMMENT 'External, as reported by the sample',
             target_id                BINARY(16) NOT NULL,
             position                 CHAR(3) CHARACTER SET ascii NOT NULL,
+            spectrum_size            SMALLINT UNSIGNED NOT NULL COMMENT 'In number of measured time periods',
             instrument_serial_number VARCHAR(20) CHARACTER SET ascii NOT NULL,
             instrument_type          TINYINT UNSIGNED NOT NULL,
             digitizer_type           TINYINT UNSIGNED NOT NULL,

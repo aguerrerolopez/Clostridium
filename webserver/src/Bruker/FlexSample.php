@@ -13,6 +13,7 @@ class FlexSample {
     const MAX_FILESIZE = 200_000; // In bytes, typically "fid" is the largest with about 85,000 bytes
     const MIN_DATETIME = '2010-01-01 00:00:00 UTC'; // Minimum allowed value in timestamps
     const MAX_DATETIME = '+1 day'; // Maximum allowed value in timestamps
+    const MIN_SPECTRUM_SIZE = 18_000;
 
     private string $basePath;
 
@@ -172,6 +173,20 @@ class FlexSample {
             throw new RuntimeException('Acquisition date is in the future ($AQ_DATE)');
         }
         return $acquisitionDate;
+    }
+
+    /**
+     * Get spectrum size
+     *
+     * @return int Spectrum size
+     * @throws RuntimeException if failed to extract metadata
+     */
+    public function getSpectrumSize(): int {
+        $spectrumSize = $this->getMetadata('acqu', '$TD');
+        if (!preg_match('/^[0-9]+$/', $spectrumSize)) {
+            throw new RuntimeException('Invalid spectrum size ($TD)');
+        }
+        return (int) $spectrumSize;
     }
 
     /**
@@ -337,9 +352,13 @@ class FlexSample {
         }
 
         // Validate spectrum
+        $spectrumSize = $this->getSpectrumSize();
         $spectrumBytes = strlen($this->getFileContents('fid'));
-        if (($spectrumBytes % 4) !== 0) {
-            throw new RuntimeException('Spectrum file ("fid") has an invalid size');
+        if ($spectrumSize < self::MIN_SPECTRUM_SIZE) {
+            throw new RuntimeException('Spectrum size ($FD) is too low');
+        }
+        if ($spectrumSize*4 != $spectrumBytes) {
+            throw new RuntimeException('Invalid size of spectrum file ("fid")');
         }
 
         // Validate acquisition metadata

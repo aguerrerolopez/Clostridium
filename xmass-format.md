@@ -30,6 +30,7 @@ Before analysis, we extract the following metadata from a sample:
 | Sample ID                                  | `##$ID_raw`  | *acqu* | fb60fc50-f999-42bb-a40e-0bcc5e262e1d  |
 | Target ID (to group different samples)     | `##$TgIDS`   | *acqu* | G_FE4FEFFA_0C05_4941_B01DB2DEDEF2F95F |
 | Acquisition date                           | `##$AQ_DATE` | *acqu* | 2023-02-22T12:48:09.692+01:00         |
+| Spectrum size                              | `##$TD`      | *acqu* | 21406                                 |
 | Instrument serial number                   | `##$InstrID` | *acqu* | 8604832.05252                         |
 | Instrument type                            | `##$InstTyp` | *acqu* | 9                                     |
 | Digitizer type                             | `##$DIGTYP`  | *acqu* | 19                                    |
