@@ -1,8 +1,8 @@
 import signal
 import time
-from src.analyzer import load_models, run_analyzer
+from src.analyzer import run_analyzer
 from src.logger import logger
-from src.models import download_models
+from src.models import download_models, load_models
 
 # Time to wait between analyzer runs, in seconds
 DELAY_BETWEEN_RUNS = 30
@@ -20,7 +20,7 @@ signal.signal(signal.SIGINT, stop_handler)
 signal.signal(signal.SIGTERM, stop_handler)
 logger.debug('Registered stop handler')
 
-# Load models
+# Initialize service
 download_models()
 load_models()
 logger.info('Started analyzer')
