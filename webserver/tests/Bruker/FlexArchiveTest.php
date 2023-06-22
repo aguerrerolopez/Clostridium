@@ -34,7 +34,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('spectra/230222-1244-1011026579/23050678/0_E1/1/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('bfe8ac98a91030ce8a7d5e50cd790af4a56411a76414ace22994f784efc82e05', $sample->getDigest());
+        $this->assertEquals('54e257fa21fe34b36f750f308d6e0df0e417f243fbcb20891226c41963eddf33', $sample->getDigest());
 
         // Sample #2
         $sample = $samples['23050678/0_E2/1/1SLin'];
@@ -49,7 +49,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('spectra/230222-1244-1011026579/23050678/0_E2/1/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('438066211432312e9e5a7624d6f7c844d898ede2432811e8d540a39764d8769e', $sample->getDigest());
+        $this->assertEquals('47ed2a9f3c3ee423ed15fafc32b707644141dbc88744246528f9391679c1e701', $sample->getDigest());
 
         // Sample #3
         $sample = $samples['23050679/0_E3/1/1SLin'];
@@ -64,7 +64,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('spectra/230222-1244-1011026579/23050679/0_E3/1/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('b5ee174616023632b6065ac5cefc44913dfcf9e055bf6d7a6c17b48a211cbd29', $sample->getDigest());
+        $this->assertEquals('74b535f549175adaf4bf6cb91492e8c09205a5c6cb4e76414cd2e309d8a910a9', $sample->getDigest());
 
         // Sample #4
         $sample = $samples['23050679/0_E4/1/1SLin'];
@@ -79,7 +79,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2023-02-21T08:58:28.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('spectra/230222-1244-1011026579/23050679/0_E4/1/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('3e04f72432353ac262d1ae2035518bfe533886d2e8e93ec3fe05c0c212624cba', $sample->getDigest());
+        $this->assertEquals('0fa3e079bcf38731be5fbcb5e1cf3b4098dc86511bbf86f134e3bb1fa909e6c2', $sample->getDigest());
 
         // Sample #5
         $sample = $samples['Clostridium difficile 239295-027/D3/0_E1/1/1SLin'];
@@ -94,7 +94,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2020-03-13T16:21:05.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('D:/INVESTIGACION MALDI/Clostridium difficile/24 INICIALES/D3/Clostridium difficile 239295-027/0_E1/1/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('99677068538895f492c20a0583dae41d9832a0d2bdbe796febab623aebb69854', $sample->getDigest());
+        $this->assertEquals('0a7ac1220e83cdc49faf1e58a64783094497b4297376faa17612de9b37bcfd64', $sample->getDigest());
 
         // Sample #6
         $sample = $samples['Clostridium difficile 239295-027/D3/0_E1/2/1SLin'];
@@ -109,7 +109,7 @@ final class FlexArchiveTest extends TestCase {
         $this->assertEquals('4.7.373.7',                                  $sample->getAidaVersion());
         $this->assertEquals(new DateTime('2020-03-13T16:21:05.000+0000'), $sample->getCalibrationDate());
         $this->assertEquals('D:/INVESTIGACION MALDI/Clostridium difficile/24 INICIALES/D3/Clostridium difficile 239295-027/0_E1/2/1SLin', $sample->getOriginalPath());
-        $this->assertEquals('3a13229aafd4534198f1d9d181c73b7371ab252166a03c4c2330f972ad30755d', $sample->getDigest());
+        $this->assertEquals('8d9dc3b095d21f9dbe680307da5da0c4086bec92e6bd1f28ca5d4538b5078007', $sample->getDigest());
     }
 
     public function testParsesFlexArchivesWithSingleSample(): void {

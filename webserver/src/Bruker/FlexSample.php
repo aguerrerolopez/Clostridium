@@ -69,7 +69,7 @@ class FlexSample {
 
         // Copy contents from stream (if needed)
         if (is_resource($data)) {
-            $data = fread($data, self::MAX_FILESIZE+1); // Note the additional byte
+            $data = stream_get_contents($data, self::MAX_FILESIZE+1, 0); // Note the additional byte
             if ($data === false) {
                 throw new RuntimeException("Failed to read file \"$path\"");
             }
