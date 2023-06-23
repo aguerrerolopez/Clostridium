@@ -7,9 +7,11 @@ import requests
 import sys
 import tempfile
 import zipfile
+from time import time
+from typing import Literal, Tuple
 from .logger import logger
 
-MODELS_VERSION = '2023-06-18 00:00:00'
+MODELS_VERSION = 1
 MODELS_URL     = 'https://uc3m-my.sharepoint.com/:u:/g/personal/100424097_alumnos_uc3m_es/EbycWvG74zhNuogGOd5vFmoBm4arDIC3812ShCA9zA-psQ?download=1'
 MODELS_SHA256  = 'db7b26238a6295ea0853ebc85265d84f7e21a3760fdf593f7ed85430be7ba97f'
 
@@ -31,14 +33,14 @@ def download_models():
     version_path = base_path + '/version.txt'
     if os.path.isfile(version_path):
         with open(version_path, 'r') as file:
-            version = file.read().strip()
+            version = int(file.read().strip())
 
     # Compare versions
-    logger.debug(f'Current models version is {version}')
+    logger.debug(f'Current models version is v{version}')
     if version == MODELS_VERSION:
         logger.debug('Models are up-to-date')
         return
-    logger.info(f'Models are outdated, most recent version is {MODELS_VERSION}')
+    logger.info(f'Models are outdated, most recent version is v{MODELS_VERSION}')
 
     # Download latest models
     with tempfile.NamedTemporaryFile() as file:
@@ -68,7 +70,7 @@ def download_models():
 
     # Update current version
     with open(version_path, 'w', newline='\n') as file:
-        file.write(MODELS_VERSION)
+        file.write(str(MODELS_VERSION))
 
     logger.info('Models were successfully updated')
 
@@ -98,3 +100,38 @@ def load_models():
     with open(base_path + '/rf.pkl', 'rb') as file:
         model_rf = pickle.load(file)
         logger.debug('Loaded RF model')
+
+def predict(
+    model_name: Literal['dblfs', 'dt', 'lr', 'rf'],
+    intensities: np.ndarray
+) -> list[Tuple[Literal['027', '181', 'other'], float]]:
+    """Get predictions from a given model, returning result and confidence"""
+    global model_dblfs, model_dt, model_lr, model_rf
+
+    # Get model
+    if model_name == 'dblfs':
+        model = model_dblfs
+    elif model_name == 'dt':
+        model = model_dt
+    elif model_name == 'lr':
+        model = model_lr
+    elif model_name == 'rf':
+        model = model_rf
+    else:
+        raise ValueError(f'Invalid model name "{model_name}"')
+
+    # Ask model
+    predictions = []
+    start_time = time()
+    y_pred_proba = model.predict_proba(intensities)
+    duration = time() - start_time
+    logger.debug(f'Model {model_name.upper()} took {duration} seconds to run')
+
+    # Parse response
+    result_values = ['027', '181', 'other']
+    for row in y_pred_proba:
+        result = result_values[row.argmax()]
+        confidence = row.max()
+        predictions.append((result, confidence))
+
+    return predictions

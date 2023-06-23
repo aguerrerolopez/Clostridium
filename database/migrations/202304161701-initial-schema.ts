@@ -63,8 +63,19 @@ export async function apply(db: Pool): Promise<void> {
             size                     INT UNSIGNED NOT NULL COMMENT 'In bytes, of the ZIP archive',
             acquired_at              DATETIME(3) NOT NULL,
             calibrated_at            DATETIME(3) NOT NULL,
+            analyzed_at              DATETIME DEFAULT NULL,
+            analyzer_version         SMALLINT UNSIGNED DEFAULT NULL,
+            dblfs_result             ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
+            dblfs_confidence         DECIMAL(7,6) UNSIGNED DEFAULT NULL,
+            dt_result                ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
+            dt_confidence            DECIMAL(7,6) UNSIGNED DEFAULT NULL,
+            lr_result                ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
+            lr_confidence            DECIMAL(7,6) UNSIGNED DEFAULT NULL,
+            rf_result                ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
+            rf_confidence            DECIMAL(7,6) UNSIGNED DEFAULT NULL,
             INDEX (instrument_serial_number),
-            INDEX (acquired_at)
+            INDEX (acquired_at),
+            INDEX (analyzer_version)
         ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
     )
 }
