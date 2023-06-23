@@ -27,16 +27,16 @@ def run_analyzer():
         """,
         [MODELS_VERSION]
     )
-    if not samples:
-        logger.debug('No samples to analyze')
-        return
     samples: list[str] = [x['digest'].hex() for x in samples]
-    logger.info(f'Found {len(samples)} sample(s) that need to be analyzed')
 
     # Analyze samples in batches
-    for i in range(0, len(samples), MAX_BATCH_SIZE):
-        chunk = samples[i:i+MAX_BATCH_SIZE]
-        _process_batch(chunk, db)
+    if samples:
+        logger.info(f'Found {len(samples)} sample(s) that need to be analyzed')
+        for i in range(0, len(samples), MAX_BATCH_SIZE):
+            chunk = samples[i:i+MAX_BATCH_SIZE]
+            _process_batch(chunk, db)
+    else:
+        logger.debug('No samples to analyze')
 
     # Disconnect from database
     db_disconnect(db)
