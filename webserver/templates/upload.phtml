@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $report .= '<div class="alert alert-info"><i class="bi bi-info-square-fill"></i> ' . $message . '</div>';
     }
     foreach (array_slice($errors, 0, UPLOAD_MAX_ERRORS, true) as $basePath=>$errorMessage) {
-        $message = sprintf('Skipped "%s"', $basePath);
+        $message = ($basePath === '') ? 'Skipped sample' : sprintf('Skipped "%s"', $basePath);
         $report .= '<div class="alert alert-danger">' .
                 '<i class="bi bi-exclamation-octagon-fill"></i> ' . $this->e($message) . ' – ' .
                 '<em>' . $this->e($errorMessage) . '</em>' .
