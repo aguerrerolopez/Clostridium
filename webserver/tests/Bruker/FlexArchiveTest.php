@@ -132,13 +132,28 @@ final class FlexArchiveTest extends TestCase {
         new FlexArchive(__DIR__ . '/samples-invalid.rar');
     }
 
-    public function testThrowsExceptionForInvalidSingleSample(): void {
-        $archive = new FlexArchive(__DIR__ . '/samples-invalid-single.zip');
+    public function testThrowsExceptionForInvalidSpectrums(): void {
+        // Incomplete spectrum
+        $archive = new FlexArchive(__DIR__ . '/samples-invalid-incomplete.zip');
         $samples = [...$archive->getSamples()];
         $this->assertEquals(1, count($samples), 'Invalid count of samples');
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Invalid size of spectrum file ("fid")');
-        $samples[0]->validate();
+        try {
+            $samples[0]->validate();
+            $this->fail('Did not throw exception when validating sample');
+        } catch (RuntimeException $e) {
+            $this->assertEquals('Invalid size of spectrum file ("fid")', $e->getMessage());
+        }
+
+        // Empty spectrum (all null bytes)
+        $archive = new FlexArchive(__DIR__ . '/samples-invalid-empty.zip');
+        $samples = [...$archive->getSamples()];
+        $this->assertEquals(1, count($samples), 'Invalid count of samples');
+        try {
+            $samples[0]->validate();
+            $this->fail('Did not throw exception when validating sample');
+        } catch (RuntimeException $e) {
+            $this->assertEquals('Empty spectrum file ("fid")', $e->getMessage());
+        }
     }
 
     public function testExportsSampleToZipArchive(): void {

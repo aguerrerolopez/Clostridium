@@ -352,13 +352,16 @@ class FlexSample {
         }
 
         // Validate spectrum
+        $spectrum = $this->getFileContents('fid');
         $spectrumSize = $this->getSpectrumSize();
-        $spectrumBytes = strlen($this->getFileContents('fid'));
         if ($spectrumSize < self::MIN_SPECTRUM_SIZE) {
             throw new RuntimeException('Spectrum size ($FD) is too low');
         }
-        if ($spectrumSize*4 != $spectrumBytes) {
+        if ($spectrumSize*4 != strlen($spectrum)) {
             throw new RuntimeException('Invalid size of spectrum file ("fid")');
+        }
+        if (trim($spectrum) === '') {
+            throw new RuntimeException('Empty spectrum file ("fid")');
         }
 
         // Validate acquisition metadata
