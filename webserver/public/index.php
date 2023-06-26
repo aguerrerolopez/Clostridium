@@ -17,8 +17,14 @@ $pageName = match ($uri) {
     '/results'                => 'results',
     '/account'                => 'account',
     '/verify-email'           => 'verify-email',
-    default                   => 'not-found',
+    default                   => null,
 };
+if ($pageName === null) {
+    $pageName = match (1) {
+        preg_match('/^\/results\/[a-zA-Z0-9]+$/', $uri) => 'result',
+        default                                         => 'not-found',
+    };
+}
 
 // Load page contents
 header_remove('x-powered-by');

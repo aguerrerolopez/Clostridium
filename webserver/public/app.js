@@ -286,6 +286,12 @@
         var $fromInput = $resultsFilters.find('input[name="from"]');
         var $toInput = $resultsFilters.find('input[name="to"]');
 
+        // Format dates in client's timezone
+        $('.results-table time').each(function() {
+            var $this = $(this);
+            $this.text(moment.unix($this.attr('datetime')).format('YYYY-MM-DD HH:mm:ss'));
+        });
+
         // Handle date picker
         var $datePicker = $resultsFilters.find('.date-picker');
         $datePicker.on('change', function() {
@@ -313,10 +319,38 @@
             document.location.href = $(this).val();
         });
 
-        // Format dates in client's timezone
-        $('.results-table time').each(function() {
+        // Handle change sample label
+        $('.results-table .label-wrapper select').on('change', function() {
             var $this = $(this);
-            $this.text(moment.unix($this.attr('datetime')).format('YYYY-MM-DD HH:mm:ss'));
+            var $wrapper = $this.parents('.label-wrapper');
+            $this.prop('disabled', true);
+            $.post('/results/' + $wrapper.data('sample'), {
+                label: $this.val()
+            }).done(function(res) {
+                $wrapper.text(res.labelName);
+            }).fail(function() {
+                $this.prop('disabled', false);
+                $this.val('');
+                alert('Failed to update label, please try again later')
+            });
+        });
+        $('.results-table .label-wrapper .btn-confirm').click(function() {
+            var $this = $(this);
+            var $wrapper = $this.parents('.label-wrapper');
+            $wrapper.find('button').prop('disabled', true);
+            $.post('/results/' + $wrapper.data('sample'), {
+                label: $this.data('label')
+            }).done(function(res) {
+                $wrapper.text(res.labelName);
+            }).fail(function() {
+                $wrapper.find('button').prop('disabled', false);
+                alert('Failed to update label, please try again later')
+            });
+        });
+        $('.results-table .label-wrapper .btn-wrong').click(function() {
+            var $wrapper = $(this).parents('.label-wrapper');
+            $wrapper.find('.btn-group').remove();
+            $wrapper.find('select').removeClass('d-none');
         });
     }
 })();
