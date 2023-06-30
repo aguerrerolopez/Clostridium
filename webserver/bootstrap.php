@@ -23,9 +23,18 @@ const RESULTS_ALLOWED_LIMITS = [20, 50, 100, 500];
 const RESULTS_DEFAULT_LIMIT = 20;
 /** @var array<int|string,string> */
 const RESULTS_ALLOWED_RIBOTYPES = [
-    '027' => 'RT027',
-    '181' => 'RT181',
-    'other' => 'Other',
+    '001' => 'RT001',
+    '002' => 'RT002',
+    '014' => 'RT014',
+    '017' => 'RT017',
+    '023' => 'RT023',
+    '027' => 'RT027', // Model output
+    '078' => 'RT078',
+    '106' => 'RT106',
+    '181' => 'RT181', // Model output
+    '207' => 'RT207',
+    '651' => 'RT651',
+    'other' => 'Other', // Model output
 ];
 
 const SESSION_COOKIE_NAME = 'sess';

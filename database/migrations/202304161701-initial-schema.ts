@@ -39,7 +39,7 @@ export async function apply(db: Pool): Promise<void> {
             account     INT UNSIGNED NOT NULL,
             sample      BINARY(32) NOT NULL COMMENT 'samples.digest',
             name        VARCHAR(200) CHARACTER SET utf8mb4 NOT NULL,
-            label       ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
+            label       ENUM('001', '002', '014', '017', '023', '027', '078', '106', '181', '207', '651', 'other') CHARACTER SET ascii DEFAULT NULL,
             uploaded_at DATETIME NOT NULL,
             labeled_at  DATETIME DEFAULT NULL,
             UNIQUE (account, sample),
