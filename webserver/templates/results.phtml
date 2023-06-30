@@ -127,6 +127,7 @@ if ($totalResults > 0) {
         </div>
     </div>
     <?php if ($totalResults > 0) { ?>
+        <?php $this->insert('partials/pending-analysis-alert', ['results' => $results]) ?>
         <div class="table-responsive">
             <table class="results-table table table-sm table-hover">
                 <thead>

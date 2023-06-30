@@ -352,5 +352,11 @@
             $wrapper.find('.btn-group').remove();
             $wrapper.find('select').removeClass('d-none');
         });
+
+        // Handle reload button
+        $('.btn-reload').click(function(e) {
+            e.preventDefault();
+            window.location.reload();
+        });
     }
 })();

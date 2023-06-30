@@ -1,0 +1,17 @@
+<?php
+$hasPendingSamples = false;
+foreach ($results as $item) {
+    foreach ($item as $key=>$value) {
+        if (str_ends_with($key, '_result') && $value === null) {
+            $hasPendingSamples = true;
+            break;
+        }
+    }
+}
+
+if ($hasPendingSamples) { ?>
+    <div class="alert alert-info" role="alert">
+        Some samples are still being processed and lack automated labels.
+        <a href="#" class="btn-reload">Reload the page</a> to see the updated results.
+    </div>
+<?php } ?>
