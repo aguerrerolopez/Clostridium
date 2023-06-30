@@ -186,6 +186,7 @@ if ($totalResults > 0) {
                                     <?php } ?>
                                 </td>
                             <?php } ?>
+                            <?php $suggestedLabel = ($suggestedLabel === 'other') ? false : $suggestedLabel ?>
 
                             <?php /* Show change label buttons */ ?>
                             <td class="text-center label-wrapper" data-sample="<?= $result['id'] ?>">
