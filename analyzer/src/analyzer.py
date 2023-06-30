@@ -93,7 +93,7 @@ def _process_batch(digests: list[str], db: Connection):
             UPDATE samples
             SET analyzed_at=%s, analyzer_version=%s,
                 dblfs_result=%s, dblfs_confidence=%s,
-                dt_result=%s, dt_confidence=%s,
+                dt_result=%s,
                 lr_result=%s, lr_confidence=%s,
                 rf_result=%s, rf_confidence=%s
             WHERE digest=UNHEX(%s)
@@ -101,9 +101,9 @@ def _process_batch(digests: list[str], db: Connection):
             [
                 now, MODELS_VERSION,
                 predictions_dblfs[i][0], predictions_dblfs[i][1],
-                predictions_dt[i][0], predictions_dt[i][1],
-                predictions_lr[i][0], predictions_lr[i][1],
-                predictions_rf[i][0], predictions_rf[i][1],
+                predictions_dt[i][0],    # No confidence for this model
+                predictions_lr[i][0],    predictions_lr[i][1],
+                predictions_rf[i][0],    predictions_rf[i][1],
                 digest,
             ]
         )

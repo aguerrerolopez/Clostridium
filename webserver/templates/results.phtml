@@ -61,7 +61,7 @@ if ($totalResults > 0) {
     $results = DB::getAll(
         'SELECT u.id, u.name, u.label, s.position, s.acquired_at,
            s.dblfs_result, s.dblfs_confidence,
-           s.dt_result, s.dt_confidence,
+           s.dt_result,
            s.lr_result, s.lr_confidence,
            s.rf_result, s.rf_confidence
          FROM uploads u
@@ -178,9 +178,11 @@ if ($totalResults > 0) {
                                         }
                                         ?>
                                         <?= RESULTS_ALLOWED_RIBOTYPES[$result[$model.'_result']] ?>
-                                        <?php $confidence = round($result[$model.'_confidence']*100) ?>
-                                        <?php $badge = ($confidence >= 90) ? 'success' : 'warning' ?>
-                                        <span class="badge badge-pill badge-<?= $badge ?>"><?= $confidence ?>%</span>
+                                        <?php if (isset($result[$model.'_confidence'])) { ?>
+                                            <?php $confidence = round($result[$model.'_confidence']*100) ?>
+                                            <?php $badge = ($confidence >= 90) ? 'success' : 'warning' ?>
+                                            <span class="badge badge-pill badge-<?= $badge ?>"><?= $confidence ?>%</span>
+                                        <?php } ?>
                                     <?php } ?>
                                 </td>
                             <?php } ?>
