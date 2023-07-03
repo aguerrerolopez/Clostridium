@@ -1,0 +1,20 @@
+<?php
+$hasOtherSamples = false; // Whether has samples labeled by AI models as "other"
+foreach ($results as $item) {
+    foreach ($item as $key=>$value) {
+        if (str_ends_with($key, '_result') && $value === 'other') {
+            $hasOtherSamples = true;
+            break;
+        }
+    }
+}
+?>
+<div class="footnotes my-2 text-muted small">
+    <div class="d-inline-block pt-2 border-top">
+        <p class="mb-0">DT: Decision Tree</p>
+        <p class="mb-0">RF: Random Forest</p>
+        <p class="mb-0">DBLFS: Dual Bayesian Linear Feature Selection</p>
+        <p class="mb-0">LR: Logistic Regressor</p>
+        <?php if ($hasOtherSamples) { ?><p id="footnote-other" class="mb-0">*: Neither RT027 nor RT181</p><?php } ?>
+    </div>
+</div>

@@ -164,3 +164,18 @@ table.results-table .anim-breathing {
         opacity: 1;
     }
 }
+
+.footnotes p:target {
+    color: #212529;
+    animation: highlighted 1s ease-in-out infinite alternate;
+}
+
+@keyframes highlighted {
+    0% {
+        background: #ffc107;
+    }
+
+    100% {
+        background: #fee296;
+    }
+}
