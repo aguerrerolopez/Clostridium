@@ -193,7 +193,7 @@ if ($totalResults > 0) {
                             <td class="text-center label-wrapper" data-sample="<?= $result['id'] ?>">
                                 <?php if ($result['label'] === null) { ?>
                                     <?php if ($suggestedLabel) { ?>
-                                        <div class="btn-group" role="group">
+                                        <div class="btn-group w-100 px-xl-1" role="group">
                                             <button type="button" title="Label as <?= RESULTS_ALLOWED_RIBOTYPES[$suggestedLabel] ?>" class="btn btn-xs btn-outline-success btn-confirm" data-label="<?= $suggestedLabel ?>"><i class="bi bi-check"></i></button>
                                             <button type="button" title="Report wrong prediction" class="btn btn-xs btn-outline-danger btn-wrong"><i class="bi bi-x"></i></button>
                                         </div>
