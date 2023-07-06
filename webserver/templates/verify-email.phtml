@@ -72,7 +72,10 @@ $accountId = DB::getOne(
 );
 if (!empty($accountId)) {
     DB::query(
-        'UPDATE accounts SET verification_token=NULL, verified_at=?s WHERE id=?i',
+        'UPDATE accounts
+         SET verification_token=NULL, max_uploads=GREATEST(?i, max_uploads), verified_at=?s
+         WHERE id=?i',
+        ACCOUNT_VERIFIED_MAX_UPLOADS,
         gmdate('Y-m-d H:i:s'),
         $accountId
     );

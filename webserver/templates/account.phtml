@@ -83,6 +83,7 @@ if (isset($_POST['password'])) {
 $firstname ??= Session::getFirstname();
 $lastname ??= Session::getLastname();
 $email = Session::getEmail();
+$maxUploads = Session::getMaxUploads();
 ?>
 
 <?php $this->layout('base', ['title' => 'Account']) ?>
@@ -117,6 +118,18 @@ $email = Session::getEmail();
         <div class="form-group">
             <label for="email">Email address<?= Session::isVerified() ? ' <i class="bi bi-patch-check-fill"></i>' : '' ?></label>
             <input type="email" class="form-control" id="email" name="email" value="<?= $this->e($email) ?>" autocomplete="username" readonly>
+        </div>
+        <div class="form-group">
+            <label for="max-uploads">Maximum allowed samples</label>
+            <input type="text" class="form-control" id="max-uploads" value="<?= $maxUploads ?>" readonly aria-describedby="max-uploads-help">
+            <small id="max-uploads-help" class="form-text text-muted">
+                <?php if (Session::isVerified()) { ?>
+                    <a href="#">Contact us</a> to adapt your upload quota to your needs
+                    <!-- // TODO: add link to contact page -->
+                <?php } else { ?>
+                    Verify your account to increase your upload quota
+                <?php } ?>
+            </small>
         </div>
         <button type="submit" class="btn btn-block btn-primary">Update information</button>
         <hr class="mt-5">

@@ -61,12 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($allValid) {
         $now = gmdate('Y-m-d H:i:s');
         $accountId = DB::query(
-            'INSERT INTO accounts (email, firstname, lastname, `password`, created_at, updated_at, last_seen_at)
-             VALUES (?s, ?s, ?s, ?s, ?s, ?s, ?s)',
+            'INSERT INTO accounts (email, firstname, lastname, `password`, max_uploads, created_at, updated_at, last_seen_at)
+             VALUES (?s, ?s, ?s, ?s, ?i, ?s, ?s, ?s)',
             $email,
             $firstname,
             $lastname,
             password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
+            ACCOUNT_UNVERIFIED_MAX_UPLOADS,
             $now,
             $now,
             $now

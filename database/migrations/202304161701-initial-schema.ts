@@ -8,6 +8,7 @@ export async function apply(db: Pool): Promise<void> {
             firstname              VARCHAR(100) CHARACTER SET utf8mb4 NOT NULL,
             lastname               VARCHAR(100) CHARACTER SET utf8mb4 NOT NULL,
             \`password\`           VARCHAR(255) CHARACTER SET ascii NOT NULL,
+            max_uploads            MEDIUMINT UNSIGNED NOT NULL COMMENT 'Maximum allowed sample uploads',
             verification_token     CHAR(40) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL COMMENT 'Token sent to verify email address',
             password_reset_token   CHAR(40) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL COMMENT 'Token sent to reset password',
             created_at             DATETIME NOT NULL,

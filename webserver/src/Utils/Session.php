@@ -24,7 +24,7 @@ class Session {
         // Get account details from token
         $token = $_COOKIE[SESSION_COOKIE_NAME] ?? '';
         self::$account = DB::getRow(
-            'SELECT a.id, a.email, a.firstname, a.lastname, a.verified_at, s.refreshes_at
+            'SELECT a.id, a.email, a.firstname, a.lastname, a.max_uploads, a.verified_at, s.refreshes_at
              FROM `sessions` s
              LEFT JOIN accounts a ON s.account=a.id
              WHERE s.token=?s AND s.expires_at>?s',
@@ -140,6 +140,16 @@ class Session {
      */
     public static function getLastname(): string {
         return self::get('lastname');
+    }
+
+    /**
+     * Get maximum allowed uploads
+     *
+     * @return int Maximum allowed uploads
+     * @throws RuntimeException if unauthenticated
+     */
+    public static function getMaxUploads(): int {
+        return (int) self::get('max_uploads');
     }
 
     /**
