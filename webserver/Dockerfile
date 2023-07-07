@@ -9,6 +9,7 @@ COPY --chmod=755 . /app
 WORKDIR /
 RUN composer install --working-dir=/app --no-dev --optimize-autoloader \
     && mv /app/nginx.conf /etc/nginx/nginx.conf \
-    && mv /app/php-custom.ini $PHP_INI_DIR/conf.d/zz-custom.ini
+    && mv /app/php.ini /usr/local/etc/php/conf.d/zz-docker.ini \
+    && mv /app/www.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/app/supervisord.conf"]
