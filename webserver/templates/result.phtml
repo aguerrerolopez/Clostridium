@@ -36,11 +36,38 @@ if (isset($_POST['label'])) {
         'labelName' => RESULTS_ALLOWED_RIBOTYPES[$label],
     ]);
 }
+
+// Get sample details
+$sample = DB::getRow(
+    'SELECT u.id, u.name, u.label, s.position, s.acquired_at
+     FROM uploads u
+     LEFT JOIN samples s ON s.digest=u.sample
+     WHERE u.id=?s AND u.account=?i',
+    $uploadId,
+    $accountId
+);
+if ($sample === null) {
+    $this->insert('not-found');
+    return;
+}
 ?>
 
 <?php $this->layout('base', ['title' => 'Sample details']) ?>
 
 <div class="container">
+    <h2 class="mt-3"><?= $this->e($sample['name']) ?></h2>
+
+    <h3 class="h5 text-uppercase text-muted">Spectrogram</h3>
     <!-- // TODO: not implemented -->
-    <?= $uploadId ?>
+
+    <div class="row">
+        <div class="col-md">
+            <h3 class="h5 text-uppercase text-muted">Analysis results</h3>
+            <!-- // TODO: not implemented -->
+        </div>
+        <div class="col-md">
+            <h3 class="h5 text-uppercase text-muted">Sample metadata</h3>
+            <!-- // TODO: not implemented -->
+        </div>
+    </div>
 </div>
