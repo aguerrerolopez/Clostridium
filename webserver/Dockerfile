@@ -5,7 +5,7 @@ RUN apk --no-cache add curl libzip-dev tzdata supervisor nginx \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy app
-COPY . /app
+COPY --chmod=755 . /app
 WORKDIR /
 RUN composer install --working-dir=/app --no-dev --optimize-autoloader \
     && mv /app/nginx.conf /etc/nginx/nginx.conf \
