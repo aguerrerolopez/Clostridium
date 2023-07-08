@@ -179,3 +179,19 @@ table.results-table .anim-breathing {
         background: #fee296;
     }
 }
+
+
+/* Result */
+.table.table-xs th,
+.table.table-xs td {
+    padding: 0.4rem 0.3rem;
+    line-height: 1.1;
+}
+
+.table.table-xs th {
+    padding-left: 0;
+}
+
+.table.table-xs td {
+    padding-right: 0;
+}

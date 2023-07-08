@@ -10,8 +10,8 @@ $uploadId = mb_substr(Http::getUri(), 9);
 
 // Handle change upload label
 if (isset($_POST['label'])) {
-    $label = strval($_POST['label']);
-    if (!isset(RESULTS_ALLOWED_RIBOTYPES[$label])) {
+    $label = strval($_POST['label']) ?: null;
+    if ($label !== null && !isset(RESULTS_ALLOWED_RIBOTYPES[$label])) {
         Response::json([
             'success' => false,
             'error' => 'Invalid label',
@@ -33,13 +33,13 @@ if (isset($_POST['label'])) {
     }
     Response::json([
         'success' => true,
-        'labelName' => RESULTS_ALLOWED_RIBOTYPES[$label],
+        'labelName' => RESULTS_ALLOWED_RIBOTYPES[$label] ?? null,
     ]);
 }
 
 // Get sample details
 $sample = DB::getRow(
-    'SELECT u.id, u.name, u.label, s.position, s.acquired_at
+    'SELECT u.id, u.name, u.label, u.uploaded_at, s.*
      FROM uploads u
      LEFT JOIN samples s ON s.digest=u.sample
      WHERE u.id=?s AND u.account=?i',
@@ -54,20 +54,97 @@ if ($sample === null) {
 
 <?php $this->layout('base', ['title' => 'Sample details']) ?>
 
-<div class="container">
+<div class="container result-page">
     <h2 class="mt-3"><?= $this->e($sample['name']) ?></h2>
-
-    <h3 class="h5 text-uppercase text-muted">Spectrogram</h3>
-    <!-- // TODO: not implemented -->
 
     <div class="row">
         <div class="col-md">
-            <h3 class="h5 text-uppercase text-muted">Analysis results</h3>
-            <!-- // TODO: not implemented -->
+            <h3 class="h5 mt-3 text-uppercase text-muted">Results</h3>
+            <table class="table table-xs table-hover table-borderless">
+                <?php
+                $models = [
+                    'dt'    => 'Decision Tree',
+                    'rf'    => 'Random Forest',
+                    'dblfs' => 'Dual Bayesian Linear Feature Selection',
+                    'lr'    => 'Logistic Regressor',
+                ];
+                foreach ($models as $model=>$modelName) { ?>
+                    <tr>
+                        <th><?= $modelName ?></th>
+                        <td>
+                            <?= RESULTS_ALLOWED_RIBOTYPES[$sample[$model.'_result']] ?>
+                            <?php if (isset($sample[$model.'_confidence'])) { ?>
+                                <?php $confidence = round($sample[$model.'_confidence']*100) ?>
+                                <?php $badge = ($confidence >= 90) ? 'success' : 'warning' ?>
+                                <span class="badge badge-pill badge-<?= $badge ?>"><?= $confidence ?>%</span>
+                            <?php } ?>
+                        </td>
+                    </tr>
+                <?php } ?>
+                <tr>
+                    <th>Actual label</th>
+                    <td>
+                        <select class="form-control form-control-sm select-label">
+                            <option value="" <?= ($sample['label'] === null) ? ' selected' : '' ?>>Unspecified</option>
+                            <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $value=>$text) { ?>
+                                <option value="<?= $value ?>"<?= ($sample['label'] == $value) ? ' selected' : '' ?>><?= $text ?></option>
+                            <?php } ?>
+                        </select>
+                    </td>
+                </tr>
+            </table>
         </div>
         <div class="col-md">
-            <h3 class="h5 text-uppercase text-muted">Sample metadata</h3>
-            <!-- // TODO: not implemented -->
+            <h3 class="h5 mt-3 text-uppercase text-muted">Metadata</h3>
+            <table class="table table-xs table-hover table-borderless">
+                <tr>
+                    <th>Sample ID</th>
+                    <td class="text-monospace"><?= preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['sample_id']), 4) ?></td>
+                </tr>
+                <tr>
+                    <th>Target ID</th>
+                    <td class="text-monospace"><?= preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['target_id']), 4) ?></td>
+                </tr>
+                <tr>
+                    <th>Instrument SN</th>
+                    <td><?= $sample['instrument_serial_number'] ?></td>
+                </tr>
+                <tr>
+                    <th>Position</th>
+                    <td><?= $sample['position'] ?></td>
+                </tr>
+                <tr>
+                    <th>Spectrum size</th>
+                    <td><?= $sample['spectrum_size'] ?></td>
+                </tr>
+                <tr>
+                    <th>flexControl version</th>
+                    <td><?= $sample['flexcontrol_version'] ?></td>
+                </tr>
+                <tr>
+                    <th>AIDA version</th>
+                    <td><?= $sample['aida_version'] ?></td>
+                </tr>
+                <tr>
+                    <th>Acquired at</th>
+                    <?php $acquiredAtTimestamp = strtotime($sample['acquired_at']) ?>
+                    <td><time datetime="<?= $acquiredAtTimestamp ?>"><?= date('Y-m-d H:i:s', $acquiredAtTimestamp) ?></time></td>
+                </tr>
+                <tr>
+                    <th>Calibrated at</th>
+                    <?php $calibratedAtTimestamp = strtotime($sample['calibrated_at']) ?>
+                    <td><time datetime="<?= $calibratedAtTimestamp ?>"><?= date('Y-m-d H:i:s', $calibratedAtTimestamp) ?></time></td>
+                </tr>
+                <tr>
+                    <th>Uploaded at</th>
+                    <?php $uploadedAtTimestamp = strtotime($sample['uploaded_at']) ?>
+                    <td><time datetime="<?= $uploadedAtTimestamp ?>"><?= date('Y-m-d H:i:s', $uploadedAtTimestamp) ?></time></td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>
+
+<?php $this->push('scripts') ?>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.18.1/moment.min.js"></script>
+<?php $this->end() ?>

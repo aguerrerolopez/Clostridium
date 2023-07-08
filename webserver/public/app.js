@@ -15,6 +15,12 @@
         });
     });
 
+    /* Localization of timestamps */
+    $('time[datetime]').each(function() {
+        var $this = $(this);
+        $this.text(moment.unix($this.attr('datetime')).format('YYYY-MM-DD HH:mm:ss'));
+    });
+
     /* Upload page */
     var $uploadArea = $('.upload-area');
     if ($uploadArea.length > 0) {
@@ -294,12 +300,6 @@
         var $fromInput = $resultsFilters.find('input[name="from"]');
         var $toInput = $resultsFilters.find('input[name="to"]');
 
-        // Format dates in client's timezone
-        $('.results-table time').each(function() {
-            var $this = $(this);
-            $this.text(moment.unix($this.attr('datetime')).format('YYYY-MM-DD HH:mm:ss'));
-        });
-
         // Handle date picker
         var $datePicker = $resultsFilters.find('.date-picker');
         $datePicker.on('change', function() {
@@ -365,6 +365,24 @@
         $('.btn-reload').click(function(e) {
             e.preventDefault();
             window.location.reload();
+        });
+    }
+
+    /* Single result page */
+    var $resultPage = $('.result-page');
+    if ($resultPage.length > 0) {
+        // Handle change sample label
+        $resultPage.find('select.select-label').change(function() {
+            var $this = $(this);
+            $this.prop('disabled', true);
+            $.post(document.location.href, {
+                label: $this.val()
+            }).fail(function() {
+                $this.val('');
+                alert('Failed to update label, please try again later')
+            }).always(function() {
+                $this.prop('disabled', false);
+            });
         });
     }
 })();
