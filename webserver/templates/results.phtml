@@ -201,7 +201,7 @@ if ($totalResults > 0) {
                                     <select class="form-control form-control-sm mx-auto<?= $suggestedLabel ? ' d-none' : '' ?>">
                                         <option selected disabled></option>
                                         <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $value=>$text) { ?>
-                                            <option value="<?= $value ?>"<?= ($result['label'] == $value) ? ' selected' : '' ?>><?= $text ?></option>
+                                            <option value="<?= $value ?>"><?= $text ?></option>
                                         <?php } ?>
                                     </select>
                                 <?php } else { ?>
