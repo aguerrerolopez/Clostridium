@@ -8,7 +8,22 @@ Session::requireAuth();
 $accountId = Session::getAccountId();
 $uploadId = mb_substr(Http::getUri(), 9);
 
-// Handle change upload label
+// Handle change name
+if (isset($_POST['name'])) {
+    $name = trim(strval($_POST['name']));
+    $name = mb_substr($name, 0, UPLOAD_NAME_MAX_LENGTH);
+    if (!empty($name)) {
+        DB::query(
+            'UPDATE uploads SET `name`=?s WHERE id=?s AND account=?i',
+            $name,
+            $uploadId,
+            $accountId
+        );
+    }
+    Response::redirect("/results/$uploadId");
+}
+
+// Handle change label
 if (isset($_POST['label'])) {
     $label = strval($_POST['label']) ?: null;
     if ($label !== null && !isset(RESULTS_ALLOWED_RIBOTYPES[$label])) {
@@ -55,7 +70,25 @@ if ($sample === null) {
 <?php $this->layout('base', ['title' => 'Sample details']) ?>
 
 <div class="container result-page">
-    <h2 class="mt-3"><?= $this->e($sample['name']) ?></h2>
+    <div class="heading my-3">
+        <h2 class="m-0">
+            <?= $this->e($sample['name']) ?>
+            <button type="button" title="Edit sample name" class="btn btn-sm btn-secondary btn-edit"><i class="bi bi-pencil-fill"></i></button>
+        </h2>
+        <form method="post" class="row d-none">
+            <div class="col-md">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="name" value="<?= $this->e($sample['name']) ?>">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-auto mt-2 mt-md-0">
+                <button type="button" class="btn btn-block btn-outline-secondary btn-cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
 
     <div class="row">
         <div class="col-md">

@@ -371,6 +371,17 @@
     /* Single result page */
     var $resultPage = $('.result-page');
     if ($resultPage.length > 0) {
+        // Handle change sample name
+        var $heading = $resultPage.find('.heading');
+        $heading.find('button.btn-edit').click(function() {
+            $heading.find('h2').addClass('d-none');
+            $heading.find('form').removeClass('d-none');
+        });
+        $heading.find('button.btn-cancel').click(function() {
+            $heading.find('form').addClass('d-none');
+            $heading.find('h2').removeClass('d-none');
+        });
+
         // Handle change sample label
         $resultPage.find('select.select-label').change(function() {
             var $this = $(this);
