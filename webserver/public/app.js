@@ -8,12 +8,6 @@
             .attr('data-original', $formBtn.html())
             .html('<span class="spinner-border spinner-border-sm"></span>');
     });
-    $(window).on('unload', function() {
-        $('form button[type="submit"][data-original]').each(function() {
-            var $this = $(this);
-            $this.html($this.data('original')).prop('disabled', false);
-        });
-    });
 
     /* Localization of timestamps */
     $('time[datetime]').each(function() {
