@@ -2,7 +2,7 @@
     var isInternetExplorer = /MSIE | Trident\//.test(window.navigator.userAgent);
 
     /* Loading state in forms */
-    $('form').on('submit', function() {
+    $('form:not([data-loading="false"])').on('submit', function() {
         const $formBtn = $(this).find('button[type="submit"]');
         $formBtn.prop('disabled', true)
             .attr('data-original', $formBtn.html())
@@ -319,6 +319,37 @@
         // Handle change number results per page
         $('select.results-limit').on('change', function() {
             document.location.href = $(this).val();
+        });
+
+        // Handle checkboxes
+        var refreshCheckboxes = function() {
+            var totalSamples = $('.results-table input[type="checkbox"][data-sample]').length;
+            var selectedSamples = $('.results-table input[type="checkbox"][data-sample]:checked').map(function() {
+                return $(this).data('sample');
+            }).get();
+
+            // Update selected sample count and form data
+            $('.selected-samples-count').text((selectedSamples.length === 1) ?
+                '1 sample selected' :
+                selectedSamples.length + ' samples selected'
+            );
+            $('button.btn-download-zip, button.btn-export-csv').prop('disabled', selectedSamples.length === 0);
+            $('form.results-download input[name="samples"]').val(selectedSamples.join(','));
+
+            // Update status of "all samples" checkbox
+            var isChecked = (selectedSamples.length === totalSamples);
+            var isIndeterminate = (selectedSamples.length > 0) && !isChecked;
+            $('#all-samples').prop('indeterminate', isIndeterminate).prop('checked', isChecked);
+        };
+        $('.results-table input[type="checkbox"]').on('change', function() {
+            var $this = $(this);
+            if ($this.data('sample') === undefined) {
+                $('.results-table input[type="checkbox"][data-sample]').prop('checked', $this.prop('checked'));
+            }
+            refreshCheckboxes();
+        });
+        $(document).ready(function() {
+            refreshCheckboxes();
         });
 
         // Handle change sample label

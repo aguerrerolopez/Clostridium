@@ -114,17 +114,18 @@ if ($totalResults > 0) {
                 <input type="hidden" name="limit" value="<?= $resultsPerPage ?>">
             </form>
         </div>
-        <div class="col-lg-5 d-flex align-items-center justify-content-end mt-2 mt-lg-0">
-            <small class="text-muted">0 samples selected</small> <!-- // TODO: not implemented -->
-            <button type="button" class="btn btn-sm btn-info ml-2">
+        <form action="/download" method="post" data-loading="false" class="results-download col-lg-5 d-flex align-items-center justify-content-end mt-2 mt-lg-0">
+            <small class="text-muted selected-samples-count">0 samples selected</small>
+            <button type="submit" class="btn btn-sm btn-info btn-download-zip ml-2" name="format" value="zip" disabled>
                 <i class="bi bi-cloud-arrow-down-fill"></i>
                 <span class="d-none d-sm-inline">Download ZIP</span>
             </button>
-            <button type="button" class="btn btn-sm btn-secondary ml-1">
+            <button type="submit" class="btn btn-sm btn-secondary btn-export-csv ml-1" name="format" value="csv" disabled>
                 <i class="bi bi-filetype-csv"></i>
                 <span class="d-none d-sm-inline">Export CSV</span>
             </button>
-        </div>
+            <input type="hidden" name="samples" value="">
+        </form>
     </div>
     <?php if ($totalResults > 0) { ?>
         <?php $this->insert('partials/pending-analysis-alert', ['results' => $results]) ?>
@@ -154,7 +155,7 @@ if ($totalResults > 0) {
                         <tr>
                             <td>
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>">
+                                    <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>" data-sample="<?= $result['id'] ?>">
                                     <label class="custom-control-label" for="sample-<?= $index ?>"></label>
                                 </div>
                             </td>
@@ -210,7 +211,7 @@ if ($totalResults > 0) {
                             </td>
 
                             <td class="col-buttons text-nowrap">
-                                <a title="Download sample" href="/results/<?= $result['id'] ?>/download" class="btn btn-xs btn-outline-gray text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                                <a title="Download sample" href="/download/<?= $result['id'] ?>" class="btn btn-xs btn-outline-gray text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
                                 <!-- // TODO: not implemented -->
                                 <button type="button" title="Delete sample" class="btn btn-xs btn-outline-gray text-danger"><i class="bi bi-trash-fill"></i></button>
                             </td>
