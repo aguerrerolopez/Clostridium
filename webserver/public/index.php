@@ -21,8 +21,9 @@ $pageName = match ($uri) {
 };
 if ($pageName === null) {
     $pageName = match (1) {
-        preg_match('/^\/results\/[a-zA-Z0-9]+$/', $uri) => 'result',
-        default                                         => 'not-found',
+        preg_match('/^\/results\/[a-zA-Z0-9]+$/',     $uri) => 'result',
+        preg_match('/^\/download(\/[a-zA-Z0-9]+)?$/', $uri) => 'download',
+        default                                             => 'not-found',
     };
 }
 

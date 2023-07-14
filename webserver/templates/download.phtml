@@ -1,0 +1,67 @@
+<?php
+use App\Utils\DB;
+use App\Utils\Http;
+use App\Utils\Response;
+use App\Utils\Session;
+
+// Require authentication
+Session::requireAuth();
+$accountId = Session::getAccountId();
+
+// Parse upload IDs from request
+$uploadIds = ($_SERVER['REQUEST_METHOD'] === 'POST') ?
+    explode(',', $_POST['samples'] ?? '') :
+    [mb_substr(Http::getUri(), 10)];
+$uploadIds = array_filter($uploadIds);
+$uploadIds = array_slice($uploadIds, 0, max(RESULTS_ALLOWED_LIMITS));
+
+// Get samples to export
+$samples = DB::getAll(
+    'SELECT u.id, u.name, u.label, u.uploaded_at, s.*
+     FROM uploads u
+     LEFT JOIN samples s ON s.digest=u.sample
+     WHERE u.id IN (?a) AND u.account=?i
+     ORDER BY s.acquired_at ASC',
+    $uploadIds,
+    $accountId
+);
+
+// Export CSV file
+$format = $_POST['format'] ?? '';
+if ($format === 'csv') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="export.csv"');
+
+    // Send header
+    echo "\xef\xbb\xbf"; // BOM for Excel
+    $fields = ['name', 'id', 'target', 'position', 'acquired_at', 'calibrated_at', 'uploaded_at', 'label'];
+    foreach (array_keys(RESULTS_MODELS) as $model) {
+        $fields[] = "{$model}_prediction";
+        $fields[] = "{$model}_confidence";
+    }
+    echo implode(';', $fields) . "\r\n";
+
+    // Send sample rows
+    foreach ($samples as $sample) {
+        $row = [];
+        $row[] = '"' . str_replace('"', '""', $sample['name']) . '"';
+        $row[] = '"' . preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['sample_id']), 4) . '"';
+        $row[] = '"' . preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['target_id']), 4) . '"';
+        $row[] = '"' . $sample['position'] . '"';
+        $row[] = gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['acquired_at']));
+        $row[] = gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['calibrated_at']));
+        $row[] = gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['uploaded_at']));
+        $row[] = RESULTS_ALLOWED_RIBOTYPES[$sample['label']] ?? '';
+        foreach (array_keys(RESULTS_MODELS) as $model) {
+            $confidence = array_key_exists("{$model}_confidence", $sample) ? $sample["{$model}_confidence"] : 1;
+            $row[] = RESULTS_ALLOWED_RIBOTYPES[$sample["{$model}_result"]] ?? '';
+            $row[] = round($confidence ?? 0, 4);
+        }
+        echo implode(';', $row) . "\r\n";
+    }
+
+    return;
+}
+
+// Serve ZIP file
+// TODO
