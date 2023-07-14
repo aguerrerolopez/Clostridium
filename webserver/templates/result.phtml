@@ -105,11 +105,15 @@ if ($sample === null) {
                     <tr>
                         <th><?= $modelName ?></th>
                         <td>
-                            <?= RESULTS_ALLOWED_RIBOTYPES[$sample[$model.'_result']] ?>
-                            <?php if (isset($sample[$model.'_confidence'])) { ?>
-                                <?php $confidence = round($sample[$model.'_confidence']*100) ?>
-                                <?php $badge = ($confidence >= 90) ? 'success' : 'warning' ?>
-                                <span class="badge badge-pill badge-<?= $badge ?>"><?= $confidence ?>%</span>
+                            <?php if ($sample[$model.'_result'] === null) { ?>
+                                <i class="bi bi-three-dots text-muted anim-breathing"></i>
+                            <?php } else { ?>
+                                <?= RESULTS_ALLOWED_RIBOTYPES[$sample[$model.'_result']] ?>
+                                <?php if (isset($sample[$model.'_confidence'])) { ?>
+                                    <?php $confidence = round($sample[$model.'_confidence']*100) ?>
+                                    <?php $badge = ($confidence >= 90) ? 'success' : 'warning' ?>
+                                    <span class="badge badge-pill badge-<?= $badge ?>"><?= $confidence ?>%</span>
+                                <?php } ?>
                             <?php } ?>
                         </td>
                     </tr>
@@ -139,7 +143,7 @@ if ($sample === null) {
                     <td class="text-monospace"><?= preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['target_id']), 4) ?></td>
                 </tr>
                 <tr>
-                    <th>Instrument SN</th>
+                    <th>Instrument <abbr title="Serial Number">SN</abbr></th>
                     <td><?= $sample['instrument_serial_number'] ?></td>
                 </tr>
                 <tr>

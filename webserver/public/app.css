@@ -2,6 +2,7 @@ main {
     min-height: 70vh;
 }
 
+
 /* Forms */
 form.session-form {
     max-width: 26rem;
@@ -22,6 +23,7 @@ form.session-form h3,
 form.wide-form h3 {
     margin-bottom: 1rem;
 }
+
 
 /* Upload samples */
 .upload-area {
@@ -105,6 +107,7 @@ form.wide-form h3 {
     margin-right: 0.5em;
 }
 
+
 /* Results */
 form.results-filters .date-picker {
     background: #fff;
@@ -151,20 +154,6 @@ table.results-table .btn.btn-outline-gray:hover {
     border-color: #6c757d;
 }
 
-table.results-table .anim-breathing {
-    animation: breathing 1s ease-in-out infinite alternate;
-}
-
-@keyframes breathing {
-    0% {
-        opacity: 0.4;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
 .footnotes p:target {
     color: #212529;
     animation: highlighted 1s ease-in-out infinite alternate;
@@ -177,6 +166,22 @@ table.results-table .anim-breathing {
 
     100% {
         background: #fee296;
+    }
+}
+
+
+/* Results and result */
+.anim-breathing {
+    animation: breathing 1s ease-in-out infinite alternate;
+}
+
+@keyframes breathing {
+    0% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
 
