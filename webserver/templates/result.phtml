@@ -94,16 +94,9 @@ if ($sample === null) {
         <div class="col-md">
             <h3 class="h5 mt-3 text-uppercase text-muted">Results</h3>
             <table class="table table-xs table-hover table-borderless">
-                <?php
-                $models = [
-                    'dt'    => 'Decision Tree (DT)',
-                    'rf'    => 'Random Forest (RF)',
-                    'dblfs' => 'Dual Bayesian Linear Feature Selection (DBLFS)',
-                    'lr'    => 'Logistic Regressor (LR)',
-                ];
-                foreach ($models as $model=>$modelName) { ?>
+                <?php foreach (RESULTS_MODELS as $model=>$modelName) { ?>
                     <tr>
-                        <th><?= $modelName ?></th>
+                        <th><?= $modelName ?> (<?= strtoupper($model) ?>)</th>
                         <td>
                             <?php if ($sample[$model.'_result'] === null) { ?>
                                 <i class="bi bi-three-dots text-muted anim-breathing"></i>

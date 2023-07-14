@@ -38,6 +38,13 @@ const RESULTS_ALLOWED_RIBOTYPES = [
     '651' => 'RT651',
     'other' => 'Other', // Model output
 ];
+/** @var array<string,string> */
+const RESULTS_MODELS = [
+    'dt'    => 'Decision Tree',
+    'rf'    => 'Random Forest',
+    'dblfs' => 'Dual Bayesian Linear Feature Selection',
+    'lr'    => 'Logistic Regressor',
+];
 
 const SESSION_COOKIE_NAME = 'sess';
 const SESSION_REFRESH_LIFETIME = 60*60*24*7; // 7 days
