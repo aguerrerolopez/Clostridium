@@ -21,11 +21,10 @@ class Session {
         }
         $now = time();
 
-        // Get account details from token
+        // Get minimal account details using token
         $token = $_COOKIE[SESSION_COOKIE_NAME] ?? '';
         self::$account = DB::getRow(
-            'SELECT a.id, a.email, a.firstname, a.lastname, a.affiliation, a.country, a.max_uploads,
-               a.verified_at, s.refreshes_at
+            'SELECT a.id, a.email, a.max_uploads, a.verified_at, s.refreshes_at
              FROM `sessions` s
              LEFT JOIN accounts a ON s.account=a.id
              WHERE s.token=?s AND s.expires_at>?s',
@@ -100,7 +99,19 @@ class Session {
         if (self::$account === null) {
             throw new RuntimeException('Unauthenticated request');
         }
-        return self::$account[$field] ?? null;
+
+        // Fetch from data from database if missing
+        if (!array_key_exists($field, self::$account)) {
+            $freshAccount = DB::getRow(
+                'SELECT email, firstname, lastname, affiliation, country, max_uploads, verified_at
+                 FROM accounts
+                 WHERE id=?i',
+                self::$account['id']
+            );
+            self::$account = array_merge(self::$account, $freshAccount);
+        }
+
+        return self::$account[$field];
     }
 
     /**
