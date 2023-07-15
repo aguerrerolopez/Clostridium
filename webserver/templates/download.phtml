@@ -35,7 +35,7 @@ if ($format === 'csv') {
 
     // Send header
     echo "\xef\xbb\xbf"; // BOM for Excel
-    $fields = ['name', 'id', 'target', 'position', 'acquired_at', 'calibrated_at', 'uploaded_at', 'label'];
+    $fields = ['name', 'upload_id', 'sample_id', 'target_id', 'position', 'acquired_at', 'calibrated_at', 'uploaded_at', 'label'];
     foreach (array_keys(RESULTS_MODELS) as $model) {
         $fields[] = "{$model}_prediction";
         $fields[] = "{$model}_confidence";
@@ -46,6 +46,7 @@ if ($format === 'csv') {
     foreach ($samples as $sample) {
         $row = [];
         $row[] = '"' . str_replace('"', '""', $sample['name']) . '"';
+        $row[] = '"' . $sample['id'] . '"';
         $row[] = '"' . preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['sample_id']), 4) . '"';
         $row[] = '"' . preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['target_id']), 4) . '"';
         $row[] = '"' . $sample['position'] . '"';
@@ -56,7 +57,7 @@ if ($format === 'csv') {
         foreach (array_keys(RESULTS_MODELS) as $model) {
             $confidence = array_key_exists("{$model}_confidence", $sample) ? $sample["{$model}_confidence"] : 1;
             $row[] = RESULTS_ALLOWED_RIBOTYPES[$sample["{$model}_result"]] ?? '';
-            $row[] = round($confidence ?? 0, 4);
+            $row[] = ($confidence === null) ? '' : round($confidence, 4);
         }
         echo implode(';', $row) . "\r\n";
     }
@@ -92,6 +93,29 @@ foreach ($samples as $sample) {
             lastModificationDateTime: $acquiredAt
         );
     }
+
+    // Add metadata file
+    $metadata = [
+        'name'          => $sample['name'],
+        'upload_id'     => $sample['id'],
+        'sample_id'     => preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['sample_id']), 4),
+        'target_id'     => preg_replace('/(?:^.{4})?.{4}\K/', '-', bin2hex($sample['target_id']), 4),
+        'position'      => $sample['position'],
+        'acquired_at'   => gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['acquired_at'])),
+        'calibrated_at' => gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['calibrated_at'])),
+        'uploaded_at'   => gmdate('Y-m-d\\TH:i:s\\Z', strtotime($sample['uploaded_at'])),
+        'label'         => RESULTS_ALLOWED_RIBOTYPES[$sample['label']] ?? null,
+    ];
+    foreach (array_keys(RESULTS_MODELS) as $model) {
+        $confidence = array_key_exists("{$model}_confidence", $sample) ? $sample["{$model}_confidence"] : 1;
+        $metadata["{$model}_prediction"] = RESULTS_ALLOWED_RIBOTYPES[$sample["{$model}_result"]] ?? null;
+        $metadata["{$model}_confidence"] = ($confidence === null) ? null : round($confidence, 4);
+    }
+    $dstZip->addFile(
+        fileName: "$basePath/autocdiff.json",
+        data: json_encode($metadata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        lastModificationDateTime: $acquiredAt
+    );
 
     $srcZip->close();
 }
