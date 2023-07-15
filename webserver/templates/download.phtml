@@ -1,8 +1,9 @@
 <?php
 use App\Utils\DB;
 use App\Utils\Http;
-use App\Utils\Response;
 use App\Utils\Session;
+use App\Utils\Storage;
+use ZipStream\ZipStream;
 
 // Require authentication
 Session::requireAuth();
@@ -63,5 +64,35 @@ if ($format === 'csv') {
     return;
 }
 
-// Serve ZIP file
-// TODO
+// Generate and send ZIP on-the-fly
+ob_end_clean();
+header('X-Accel-Buffering: no');
+header('Content-Type: application/zip');
+header('Content-Disposition: attachment; filename="export.zip"');
+$dstZip = new ZipStream(sendHttpHeaders: false);
+/** @var array<string,int> */
+$counters = [];
+foreach ($samples as $sample) {
+    $srcPath = Storage::getPathToSample(bin2hex($sample['digest']));
+    $srcZip = new ZipArchive();
+    $srcZip->open($srcPath, ZipArchive::RDONLY);
+
+    // Generate base path
+    $basePath = Storage::sanitizePathPart($sample['name']) . "/0_{$sample['position']}";
+    $counters[$basePath] = ($counters[$basePath] ?? 0) + 1;
+    $basePath = "$basePath/{$counters[$basePath]}/1SLin";
+
+    // Serve each file from sample
+    $acquiredAt = DateTime::createFromFormat('U', strtotime($sample['acquired_at']));
+    for ($i=0; $i<$srcZip->numFiles; $i++) {
+        $itemPath = $srcZip->getNameIndex($i);
+        $dstZip->addFileFromStream(
+            fileName: "$basePath/$itemPath",
+            stream: $srcZip->getStreamIndex($i),
+            lastModificationDateTime: $acquiredAt
+        );
+    }
+
+    $srcZip->close();
+}
+$dstZip->finish();
