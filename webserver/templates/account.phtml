@@ -1,5 +1,6 @@
 <?php
 use App\Utils\DB;
+use App\Utils\Intl;
 use App\Utils\Session;
 
 Session::requireAuth();
@@ -9,6 +10,8 @@ $successModal = false;
 if (isset($_POST['firstname'])) {
     $firstname = trim($_POST['firstname'] ?? '');
     $lastname = trim($_POST['lastname'] ?? '');
+    $affiliation = trim($_POST['affiliation'] ?? '');
+    $country = strval($_POST['country'] ?? '');
 
     // Validate account details
     $allValid = true;
@@ -28,14 +31,28 @@ if (isset($_POST['firstname'])) {
         $lastnameInvalid = 'Field is too long';
         $allValid = false;
     }
+    if (empty($affiliation)) {
+        $affiliationInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($affiliation) > ACCOUNT_AFFILIATION_MAX_LENGTH) {
+        $affiliationInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (!isset(Intl::COUNTRIES[$country])) {
+        $countryInvalid = 'Field is required';
+        $allValid = false;
+    }
 
     // Update details
     if ($allValid) {
         $now = gmdate('Y-m-d H:i:s');
         DB::query(
-            'UPDATE accounts SET firstname=?s, lastname=?s, updated_at=?s WHERE id=?i',
+            'UPDATE accounts SET firstname=?s, lastname=?s, affiliation=?s, country=?s, updated_at=?s WHERE id=?i',
             $firstname,
             $lastname,
+            $affiliation,
+            $country,
             $now,
             $accountId
         );
@@ -82,6 +99,8 @@ if (isset($_POST['password'])) {
 // Get account details to render in template
 $firstname ??= Session::getFirstname();
 $lastname ??= Session::getLastname();
+$affiliation ??= Session::getAffiliation();
+$country ??= Session::getCountry();
 $email = Session::getEmail();
 $maxUploads = Session::getMaxUploads();
 ?>
@@ -114,6 +133,24 @@ $maxUploads = Session::getMaxUploads();
                     <?php } ?>
                 </div>
             </div>
+        </div>
+        <div class="form-group">
+            <label for="affiliation">Affiliation</label>
+            <input type="text" class="form-control<?= empty($affiliationInvalid) ? '' : ' is-invalid' ?>" id="affiliation" name="affiliation" value="<?= $this->e($affiliation ?? '') ?>" required>
+            <?php if (!empty($affiliationInvalid)) { ?>
+                <div class="invalid-feedback"><?= $affiliationInvalid ?></div>
+            <?php } ?>
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <select class="form-control<?= empty($countryInvalid) ? '' : ' is-invalid' ?>" id="country" name="country" required>
+                <?php foreach (Intl::COUNTRIES as $code=>$name) { ?>
+                    <option value="<?= $code ?>"<?= ($country === $code) ? ' selected' : '' ?>><?= $this->e($name) ?></option>
+                <?php } ?>
+            </select>
+            <?php if (!empty($countryInvalid)) { ?>
+                <div class="invalid-feedback"><?= $countryInvalid ?></div>
+            <?php } ?>
         </div>
         <div class="form-group">
             <label for="email">Email address<?= Session::isVerified() ? ' <i class="bi bi-patch-check-fill"></i>' : '' ?></label>

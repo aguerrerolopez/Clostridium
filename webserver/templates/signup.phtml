@@ -1,5 +1,6 @@
 <?php
 use App\Utils\DB;
+use App\Utils\Intl;
 use App\Utils\Response;
 use App\Utils\Session;
 
@@ -11,9 +12,11 @@ if (Session::isAuthed()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = trim($_POST['firstname'] ?? '');
     $lastname = trim($_POST['lastname'] ?? '');
+    $affiliation = trim($_POST['affiliation'] ?? '');
+    $country = strval($_POST['country'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $passwordConfirm = $_POST['password-confirm'] ?? '';
+    $password = strval($_POST['password'] ?? '');
+    $passwordConfirm = strval($_POST['password-confirm'] ?? '');
 
     // Validate account details
     $allValid = true;
@@ -31,6 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (mb_strlen($lastname) > ACCOUNT_LASTNAME_MAX_LENGTH) {
         $lastnameInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (empty($affiliation)) {
+        $affiliationInvalid = 'Field is required';
+        $allValid = false;
+    }
+    if (mb_strlen($affiliation) > ACCOUNT_AFFILIATION_MAX_LENGTH) {
+        $affiliationInvalid = 'Field is too long';
+        $allValid = false;
+    }
+    if (!isset(Intl::COUNTRIES[$country])) {
+        $countryInvalid = 'Field is required';
         $allValid = false;
     }
     if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
@@ -61,11 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($allValid) {
         $now = gmdate('Y-m-d H:i:s');
         $accountId = DB::query(
-            'INSERT INTO accounts (email, firstname, lastname, `password`, max_uploads, created_at, updated_at, last_seen_at)
-             VALUES (?s, ?s, ?s, ?s, ?i, ?s, ?s, ?s)',
+            'INSERT INTO accounts (email, firstname, lastname, affiliation, country, `password`, max_uploads,
+               created_at, updated_at, last_seen_at)
+             VALUES (?s, ?s, ?s, ?s, ?s, ?s, ?i, ?s, ?s, ?s)',
             $email,
             $firstname,
             $lastname,
+            $affiliation,
+            $country,
             password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
             ACCOUNT_UNVERIFIED_MAX_UPLOADS,
             $now,
@@ -104,6 +122,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php } ?>
                 </div>
             </div>
+        </div>
+        <div class="form-group">
+            <label for="affiliation">Affiliation</label>
+            <input type="text" class="form-control<?= empty($affiliationInvalid) ? '' : ' is-invalid' ?>" id="affiliation" name="affiliation" value="<?= $this->e($affiliation ?? '') ?>" placeholder="Universidad Carlos III de Madrid" required>
+            <?php if (!empty($affiliationInvalid)) { ?>
+                <div class="invalid-feedback"><?= $affiliationInvalid ?></div>
+            <?php } ?>
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <select class="form-control<?= empty($countryInvalid) ? '' : ' is-invalid' ?>" id="country" name="country" required>
+                <option<?= empty($country) ? ' selected' : '' ?> disabled></option>
+                <?php foreach (Intl::COUNTRIES as $code=>$name) { ?>
+                    <option value="<?= $code ?>"<?= (isset($country) && $country === $code) ? ' selected' : '' ?>><?= $this->e($name) ?></option>
+                <?php } ?>
+            </select>
+            <?php if (!empty($countryInvalid)) { ?>
+                <div class="invalid-feedback"><?= $countryInvalid ?></div>
+            <?php } ?>
         </div>
         <div class="form-group">
             <label for="email">Email address</label>
