@@ -23,9 +23,10 @@ services:
       TZ: ${TZ:-UTC}
     healthcheck:
       test: ['CMD-SHELL', 'test -f /var/tmp/ready.status']
-      interval: 5s
-      timeout: 10s
-      retries: 10
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 60s
     volumes:
       - ${DB_DATA_DIR:?}:/var/lib/mysql:delegated
     expose:
@@ -34,7 +35,10 @@ services:
   # Webserver service
   webserver:
     build: ./webserver
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     depends_on:
       database:
         condition: service_healthy
