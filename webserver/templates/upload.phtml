@@ -217,8 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="mb-1">For operational reasons, we limit the number of files you can upload to <strong><?= Session::getMaxUploads() ?> samples</strong>.</p>
                     <p class="mb-1">Unfortunately, your account has already reached this limit.</p>
                     <?php if (Session::isVerified()) { ?>
-                        <p class="mb-0">You can request an increase to this limit for free by <a href="#">contacting us</a>.</p>
-                        <!-- // TODO: add link to contact page -->
+                        <p class="mb-0">You can request an increase to this limit for free by <a href="mailto:<?= APP_SUPPORT_EMAIL ?>" target="_blank">contacting us</a>.</p>
                     <?php } else { ?>
                         <p class="mb-0">You can easily increase this limit to <?= ACCOUNT_VERIFIED_MAX_UPLOADS ?> samples by <a href="/account">verifying your account</a>.</p>
                     <?php } ?>

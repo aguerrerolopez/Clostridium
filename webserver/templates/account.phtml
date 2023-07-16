@@ -161,8 +161,7 @@ $maxUploads = Session::getMaxUploads();
             <input type="text" class="form-control" id="max-uploads" value="<?= $maxUploads ?>" readonly aria-describedby="max-uploads-help">
             <small id="max-uploads-help" class="form-text text-muted">
                 <?php if (Session::isVerified()) { ?>
-                    <a href="#">Contact us</a> to adapt your upload quota to your needs for free
-                    <!-- // TODO: add link to contact page -->
+                    <a href="mailto:<?= APP_SUPPORT_EMAIL ?>" target="_blank">Contact us</a> to adapt your upload quota to your needs for free
                 <?php } else { ?>
                     Verify your account to increase your upload quota
                 <?php } ?>

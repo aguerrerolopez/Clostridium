@@ -5,6 +5,7 @@ date_default_timezone_set('UTC');
 // Define constants
 const APP_NAME = 'AutoCdiff';
 const APP_VERSION = '0.0.1-beta';
+const APP_SUPPORT_EMAIL = 'support@example.com'; // TODO: change with actual value
 
 const ACCOUNT_FIRSTNAME_MAX_LENGTH = 100;
 const ACCOUNT_LASTNAME_MAX_LENGTH = 100;
