@@ -44,12 +44,20 @@ class FlexSample {
     /**
      * Add file to sample
      *
+     * NOTE: will prevent certain blocklisted files from being added.
+     *
      * @param  string          $path Relative path to file
      * @param  string|resource $data File contents or handle to stream
      * @return static                This instance
      */
     public function addFile(string $path, $data): static {
-        $this->files[$path] = $data;
+        $basename = mb_strtolower(basename($path));
+        if (
+            !str_contains($path, '__MACOSX/') &&
+            !in_array($basename, ['desktop.ini', 'thumbs.db', '.ds_store', 'autocdiff.json'], true)
+        ) {
+            $this->files[$path] = $data;
+        }
         return $this;
     }
 

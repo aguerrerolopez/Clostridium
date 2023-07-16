@@ -156,6 +156,13 @@ final class FlexArchiveTest extends TestCase {
         }
     }
 
+    public function testIgnoresBlocklistedFiles(): void {
+        $archive = new FlexArchive(__DIR__ . '/samples-blocklist.zip');
+        /** @var FlexSample */
+        $sample = [...$archive->getSamples()][0];
+        $this->assertEquals('1eb761929d5776a25a3d935e616bb8502853c0d2417b559fb17527525152a104', $sample->getDigest());
+    }
+
     public function testExportsSampleToZipArchive(): void {
         $archive = new FlexArchive(__DIR__ . '/samples-valid.zip');
         foreach ($archive->getSamples() as $sample) {
