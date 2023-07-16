@@ -59,11 +59,7 @@ $currentPage = min(max(intval($_GET['page'] ?? 0), 1), $maxPage);
 $results = [];
 if ($totalResults > 0) {
     $results = DB::getAll(
-        'SELECT u.id, u.name, u.label, s.position, s.acquired_at,
-           s.dblfs_result, s.dblfs_confidence,
-           s.dt_result,
-           s.lr_result, s.lr_confidence,
-           s.rf_result, s.rf_confidence
+        'SELECT u.id, u.name, u.label, s.*
          FROM uploads u
          LEFT JOIN samples s ON s.digest=u.sample
          ?p
@@ -158,7 +154,12 @@ if ($totalResults > 0) {
                                     <label class="custom-control-label" for="sample-<?= $index ?>"></label>
                                 </div>
                             </td>
-                            <td><a href="/results/<?= $result['id'] ?>"><?= $this->e($result['name']) ?></a></td>
+                            <td>
+                                <a href="/results/<?= $result['id'] ?>" class="sample-name"><?= $this->e($result['name']) ?></a>
+                                <?php if ($result['in_use']) { ?>
+                                    <i class="bi bi-heart-fill small text-pink" title="This sample has been used to improve our AI models"></i>
+                                <?php } ?>
+                            </td>
                             <td><?= $result['position'] ?></td>
                             <?php $acquiredAtTimestamp = strtotime($result['acquired_at']) ?>
                             <td><time datetime="<?= $acquiredAtTimestamp ?>"><?= date('Y-m-d H:i:s', $acquiredAtTimestamp) ?></time></td>
@@ -211,8 +212,7 @@ if ($totalResults > 0) {
 
                             <td class="col-buttons text-nowrap">
                                 <a title="Download sample" href="/download/<?= $result['id'] ?>" class="btn btn-xs btn-outline-gray text-info"><i class="bi bi-cloud-arrow-down-fill"></i></a>
-                                <!-- // TODO: not implemented -->
-                                <button type="button" title="Delete sample" class="btn btn-xs btn-outline-gray text-danger"><i class="bi bi-trash-fill"></i></button>
+                                <button type="button" title="Delete sample" class="btn btn-xs btn-outline-gray btn-delete text-danger"><i class="bi bi-trash-fill"></i></button>
                             </td>
                         </tr>
                     <?php } ?>
@@ -259,6 +259,37 @@ if ($totalResults > 0) {
     <?php } ?>
 </div>
 
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete sample</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to delete <strong class="sample-name"></strong> from our servers.
+                    This action is immediate and cannot be undone.
+                </p>
+                <p class="small inuse-message">
+                    <strong>A message from our team <i class="bi bi-heart-fill text-pink"></i></strong><br>
+                    This sample is being used to improve the quality of our predictions, helping other medical professionals and researchers just like you.
+                    If you delete it, the accuracy of our AI models will decrease. Please consider this before continuing.
+                </p>
+                <p class="small mb-0">
+                    <strong>Deleting samples because you exceeded your upload quota?</strong><br>
+                    <a href="#">Contact us</a> to increase it for free to avoid lose of data.
+                    <!-- // TODO: add link to contact page -->
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No, cancel</button>
+                <button type="button" class="btn btn-outline-danger btn-confirm-delete">Yes, delete sample</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php $this->push('styles') ?>
     <link href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.css" rel="stylesheet">
 <?php $this->end() ?>
@@ -266,4 +297,5 @@ if ($totalResults > 0) {
 <?php $this->push('scripts') ?>
     <script src="https://cdn.jsdelivr.net/momentjs/2.18.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 <?php $this->end() ?>

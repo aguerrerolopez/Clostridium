@@ -75,9 +75,11 @@ export async function apply(db: Pool): Promise<void> {
             lr_confidence            DECIMAL(7,6) UNSIGNED DEFAULT NULL,
             rf_result                ENUM('027', '181', 'other') CHARACTER SET ascii DEFAULT NULL,
             rf_confidence            DECIMAL(7,6) UNSIGNED DEFAULT NULL,
+            in_use                   BIT(1) NOT NULL DEFAULT 0 COMMENT 'Whether sample is used in training',
             INDEX (instrument_serial_number),
             INDEX (acquired_at),
-            INDEX (analyzer_version)
+            INDEX (analyzer_version),
+            INDEX (in_use)
         ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`
     )
 }

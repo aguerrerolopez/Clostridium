@@ -6,13 +6,42 @@ class Storage {
         'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'];
 
     /**
+     * Is directory empty
+     *
+     * @param  string  $path Path to directory
+     * @return boolean       Whether directory is empty or not
+     */
+    public static function isDirectoryEmpty(string $path): bool {
+        return (count(scandir($path)) === 2);
+    }
+
+    /**
      * Get path to sample file
      *
-     * @param  string $digest Sample digest
+     * @param  string $digest Sample digest in lowercase hexadecimal
      * @return string         Path to sample
      */
     public static function getPathToSample(string $digest): string {
         return getenv('SAMPLES_DATA_DIR') . '/' . substr($digest, 0, 2) . '/' . substr($digest, 2, 2) . "/$digest.zip";
+    }
+
+    /**
+     * Delete sample file
+     *
+     * @param string $digest Sample digest in lowercase hexadecimal
+     */
+    public static function deleteSample(string $digest): void {
+        $path = self::getPathToSample($digest);
+        unlink($path);
+
+        // Delete parent directories if empty
+        $parentPaths = [dirname($path), dirname($path, 2)];
+        foreach ($parentPaths as $parentPath) {
+            if (!self::isDirectoryEmpty($parentPath)) {
+                break;
+            }
+            rmdir($parentPath);
+        }
     }
 
     /**

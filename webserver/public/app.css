@@ -1,5 +1,10 @@
+/* Common */
 main {
     min-height: 70vh;
+}
+
+.text-pink {
+    color: #e36199;
 }
 
 

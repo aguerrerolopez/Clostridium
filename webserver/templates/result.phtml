@@ -3,6 +3,7 @@ use App\Utils\DB;
 use App\Utils\Http;
 use App\Utils\Response;
 use App\Utils\Session;
+use App\Utils\Storage;
 
 Session::requireAuth();
 $accountId = Session::getAccountId();
@@ -50,6 +51,30 @@ if (isset($_POST['label'])) {
         'success' => true,
         'labelName' => RESULTS_ALLOWED_RIBOTYPES[$label] ?? null,
     ]);
+}
+
+// Handle delete
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $digest = DB::getOne('SELECT sample FROM uploads WHERE id=?s AND account=?i', $uploadId, $accountId);
+    if ($digest === false) {
+        Response::json([
+            'success' => false,
+            'error' => 'Invalid sample',
+        ], 400);
+    }
+    $digest = bin2hex($digest);
+
+    // Delete upload row
+    DB::query('DELETE FROM uploads WHERE id=?s', $uploadId);
+
+    // Delete sample (if no longer in use by other accounts)
+    $numberOfUsages = DB::getOne('SELECT COUNT(*) FROM uploads WHERE sample=x?s', $digest);
+    if ($numberOfUsages == 0) {
+        DB::query('DELETE FROM samples WHERE digest=x?s', $digest);
+        Storage::deleteSample($digest);
+    }
+
+    Response::json(['success' => true]);
 }
 
 // Get sample details

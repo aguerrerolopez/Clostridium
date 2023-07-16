@@ -385,6 +385,28 @@
             $wrapper.find('select').removeClass('d-none');
         });
 
+        // Handle delete sample
+        $('.results-table .btn-delete').click(function() {
+            var $row = $(this).parents('tr');
+            var $modal = $('#deleteModal');
+            $modal.find('.sample-name').text($row.find('.sample-name').text());
+            $modal.find('.inuse-message').toggleClass('d-none', !$row.data('inuse'));
+            $modal.find('.btn-confirm-delete').data('sample', $row.data('sample'));
+            $modal.modal();
+        });
+        $('#deleteModal .btn-confirm-delete').click(function() {
+            var $this = $(this);
+            $this.html('<span class="spinner-border spinner-border-sm"></span>').prop('disabled', true);
+            $.ajax({
+                method: 'DELETE',
+                url: '/results/' + $this.data('sample')
+            }).fail(function() {
+                alert('Failed to delete sample, please try again later');
+            }).always(function() {
+                window.location.reload();
+            });
+        });
+
         // Handle reload button
         $('.btn-reload').click(function(e) {
             e.preventDefault();
