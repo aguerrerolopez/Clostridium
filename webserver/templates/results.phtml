@@ -151,10 +151,10 @@ if ($totalResults > 0) {
                 </thead>
                 <tbody>
                     <?php foreach ($results as $index=>$result) { ?>
-                        <tr>
+                        <tr data-sample="<?= $result['id'] ?>" data-inuse="<?= $result['in_use'] ? 'true' : 'false' ?>">
                             <td>
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>" data-sample="<?= $result['id'] ?>">
+                                    <input type="checkbox" class="custom-control-input" id="sample-<?= $index ?>">
                                     <label class="custom-control-label" for="sample-<?= $index ?>"></label>
                                 </div>
                             </td>
@@ -190,7 +190,7 @@ if ($totalResults > 0) {
                             <?php $suggestedLabel = ($suggestedLabel === 'other') ? false : $suggestedLabel ?>
 
                             <?php /* Show change label buttons */ ?>
-                            <td class="text-center label-wrapper" data-sample="<?= $result['id'] ?>">
+                            <td class="text-center label-wrapper">
                                 <?php if ($result['label'] === null) { ?>
                                     <?php if ($suggestedLabel) { ?>
                                         <div class="btn-group w-100 px-xl-1" role="group">

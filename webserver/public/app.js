@@ -323,9 +323,9 @@
 
         // Handle checkboxes
         var refreshCheckboxes = function() {
-            var totalSamples = $('.results-table input[type="checkbox"][data-sample]').length;
-            var selectedSamples = $('.results-table input[type="checkbox"][data-sample]:checked').map(function() {
-                return $(this).data('sample');
+            var totalSamples = $('.results-table tbody input[type="checkbox"]').length;
+            var selectedSamples = $('.results-table tbody input[type="checkbox"]:checked').map(function() {
+                return $(this).parents('tr').data('sample');
             }).get();
 
             // Update selected sample count and form data
@@ -341,11 +341,11 @@
             var isIndeterminate = (selectedSamples.length > 0) && !isChecked;
             $('#all-samples').prop('indeterminate', isIndeterminate).prop('checked', isChecked);
         };
-        $('.results-table input[type="checkbox"]').on('change', function() {
-            var $this = $(this);
-            if ($this.data('sample') === undefined) {
-                $('.results-table input[type="checkbox"][data-sample]').prop('checked', $this.prop('checked'));
-            }
+        $('.results-table thead input[type="checkbox"]').on('change', function() {
+            $('.results-table tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+            refreshCheckboxes();
+        });
+        $('.results-table tbody input[type="checkbox"]').on('change', function() {
             refreshCheckboxes();
         });
         $(document).ready(function() {
@@ -355,12 +355,11 @@
         // Handle change sample label
         $('.results-table .label-wrapper select').on('change', function() {
             var $this = $(this);
-            var $wrapper = $this.parents('.label-wrapper');
             $this.prop('disabled', true);
-            $.post('/results/' + $wrapper.data('sample'), {
+            $.post('/results/' + $this.parents('tr').data('sample'), {
                 label: $this.val()
             }).done(function(res) {
-                $wrapper.text(res.labelName);
+                $this.parents('.label-wrapper').text(res.labelName);
             }).fail(function() {
                 $this.prop('disabled', false);
                 $this.val('');
@@ -371,7 +370,7 @@
             var $this = $(this);
             var $wrapper = $this.parents('.label-wrapper');
             $wrapper.find('button').prop('disabled', true);
-            $.post('/results/' + $wrapper.data('sample'), {
+            $.post('/results/' + $this.parents('tr').data('sample'), {
                 label: $this.data('label')
             }).done(function(res) {
                 $wrapper.text(res.labelName);
