@@ -35,7 +35,9 @@ if (isset($_POST['label'])) {
     }
 
     $rowCount = DB::query(
-        'UPDATE uploads SET label=?s, labeled_at=?s WHERE id=?s AND account=?i',
+        'UPDATE uploads
+         SET label=?s, labeled_at=?s
+         WHERE id=?s AND account=?i AND in_use=0',
         $label,
         gmdate('Y-m-d H:i:s'),
         $uploadId,
@@ -139,15 +141,25 @@ if ($sample === null) {
                 <tr>
                     <th>Actual label</th>
                     <td>
-                        <select class="form-control form-control-sm select-label">
-                            <option value="" <?= ($sample['label'] === null) ? ' selected' : '' ?>>Unspecified</option>
-                            <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $value=>$text) { ?>
-                                <option value="<?= $value ?>"<?= ($sample['label'] == $value) ? ' selected' : '' ?>><?= $text ?></option>
-                            <?php } ?>
-                        </select>
+                        <?php if ($sample['in_use']) { ?>
+                            <?= ($sample['label'] === null) ? 'Unspecified' : RESULTS_ALLOWED_RIBOTYPES[$sample['label']] ?>
+                        <?php } else { ?>
+                            <select class="form-control form-control-sm select-label">
+                                <option value="" <?= ($sample['label'] === null) ? ' selected' : '' ?>>Unspecified</option>
+                                <?php foreach (RESULTS_ALLOWED_RIBOTYPES as $value=>$text) { ?>
+                                    <option value="<?= $value ?>"<?= ($sample['label'] == $value) ? ' selected' : '' ?>><?= $text ?></option>
+                                <?php } ?>
+                            </select>
+                        <?php } ?>
                     </td>
                 </tr>
             </table>
+            <?php if ($sample['in_use']) { ?>
+                <div class="alert alert-info" role="alert">
+                    <strong>Thank you for your contribution! <i class="bi bi-heart-fill text-pink"></i></strong><br>
+                    This sample is used to train our AI models. As such, it is no longer possible to modify the actual label.
+                </div>
+            <?php } ?>
         </div>
         <div class="col-md">
             <h3 class="h5 mt-3 text-uppercase text-muted">Metadata</h3>
