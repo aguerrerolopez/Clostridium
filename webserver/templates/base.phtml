@@ -16,7 +16,7 @@
         <?= $this->section('content') ?>
     </main>
     <?php $this->insert('partials/footer') ?>
-    <script>window.Promise || document.write('<script src="/ie-polyfills.js"><\/script>')</script>
+    <script>window.Promise || document.write('<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>')</script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <?= $this->section('scripts') ?>
     <script src="/app.js?v=<?= urlencode(APP_VERSION) ?>"></script>
