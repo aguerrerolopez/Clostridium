@@ -36,7 +36,7 @@ def download_models():
             version = int(file.read().strip())
 
     # Compare versions
-    logger.debug(f'Current models version is v{version}')
+    logger.debug(f'Current models version is v{version}' if version else 'No local models found')
     if version == MODELS_VERSION:
         logger.debug('Models are up-to-date')
         return
