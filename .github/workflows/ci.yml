@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "PUID=1234" >> .env
           echo "PGID=1234" >> .env
-          echo "LOG_LEVEL=debug" >> .env
+          echo "LOG_LEVEL=DEBUG" >> .env
           echo "TZ=Europe/Madrid" >> .env
           echo "SAMPLES_DATA_DIR=/var/tmp/samples_data" >> .env
           echo "DB_DATA_DIR=/var/tmp/db_data" >> .env
