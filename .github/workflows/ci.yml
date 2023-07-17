@@ -48,7 +48,7 @@ jobs:
           echo "SAMPLES_DATA_DIR=/var/tmp/samples_data" >> .env
           echo "DB_DATA_DIR=/var/tmp/db_data" >> .env
           mkdir /var/tmp/samples_data /var/tmp/db_data
-          chown 1234:1234 /var/tmp/*_data
+          chmod 777 /var/tmp/*_data
           docker compose build --pull
 
       # Test application
