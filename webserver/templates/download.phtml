@@ -57,7 +57,7 @@ if ($format === 'csv') {
         foreach (array_keys(RESULTS_MODELS) as $model) {
             $confidence = array_key_exists("{$model}_confidence", $sample) ? $sample["{$model}_confidence"] : 1;
             $row[] = RESULTS_ALLOWED_RIBOTYPES[$sample["{$model}_result"]] ?? '';
-            $row[] = ($confidence === null) ? '' : round($confidence, 4);
+            $row[] = ($sample["{$model}_result"] === null || $confidence === null) ? '' : round($confidence, 4);
         }
         echo implode(';', $row) . "\r\n";
     }
@@ -109,7 +109,9 @@ foreach ($samples as $sample) {
     foreach (array_keys(RESULTS_MODELS) as $model) {
         $confidence = array_key_exists("{$model}_confidence", $sample) ? $sample["{$model}_confidence"] : 1;
         $metadata["{$model}_prediction"] = RESULTS_ALLOWED_RIBOTYPES[$sample["{$model}_result"]] ?? null;
-        $metadata["{$model}_confidence"] = ($confidence === null) ? null : round($confidence, 4);
+        $metadata["{$model}_confidence"] = ($sample["{$model}_result"] === null || $confidence === null) ?
+            null :
+            round($confidence, 4);
     }
     $dstZip->addFile(
         fileName: "$basePath/autocdiff.json",
