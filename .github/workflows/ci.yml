@@ -1,0 +1,77 @@
+name: CI
+
+on: [push]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      # Download code from repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      # Setup Composer
+      - name: Setup Composer
+        working-directory: ./webserver
+        run: composer validate --strict && composer install
+
+      # Run tests
+      - name: Run tests
+        working-directory: ./webserver
+        run: vendor/bin/simple-phpunit --testdox
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Download code from repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup application
+      - name: Setup application
+        run: |
+          echo "PUID=1234" >> .env
+          echo "PGID=1234" >> .env
+          echo "LOG_LEVEL=debug" >> .env
+          echo "TZ=Europe/Madrid" >> .env
+          echo "SAMPLES_DATA_DIR=/var/tmp/samples_data" >> .env
+          echo "DB_DATA_DIR=/var/tmp/db_data" >> .env
+          mkdir /var/tmp/samples_data /var/tmp/db_data
+          chown 1234:1234 /var/tmp/*_data
+          docker compose build --pull
+
+      # Test application
+      - name: Test application
+        run: |
+          timeout -s SIGINT 40s docker compose up 2>&1 | tee app.log || true
+          if ! grep -Fq 'mariadbd: ready for connections' app.log; then
+            echo "Database server did not start"
+            exit 1
+          fi
+          if ! grep -Fq 'Applying pending migration' app.log; then
+            echo "Failed to apply database migrations"
+            exit 1
+          fi
+          if ! grep -Fq 'Started analyzer' app.log; then
+            echo "Failed to start analyzer"
+            exit 1
+          fi
+          if ! grep -Fq 'caddy entered RUNNING state' app.log; then
+            echo "Failed to start Caddy"
+            exit 1
+          fi
+          if ! grep -Fq 'php-fpm entered RUNNING state' app.log; then
+            echo "Failed to start php-fpm"
+            exit 1
+          fi
