@@ -67,7 +67,6 @@ if ($format === 'csv') {
 
 // Generate and send ZIP on-the-fly
 ob_end_clean();
-header('X-Accel-Buffering: no');
 header('Content-Type: application/zip');
 header('Content-Disposition: attachment; filename="export.zip"');
 $dstZip = new ZipStream(sendHttpHeaders: false);

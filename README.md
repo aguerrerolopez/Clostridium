@@ -13,8 +13,13 @@ PUID=1000                                # Process UID for containers with mount
 PGID=1000                                # Process GID for containers with mounted volumes
 LOG_LEVEL="DEBUG"                        # Optional, defaults to "INFO"
 TZ="Europe/Madrid"                       # Only for logs (database always stores timestamps in UTC)
+
+# Storage settings
 SAMPLES_DATA_DIR="/path/to/samples/dir"  # Path to samples data directory (read-write)
 DB_DATA_DIR="/path/to/db/data/dir"       # Path to database data directory (read-write)
+
+# Webserver settings
+HOSTNAME="example.com"  # Optional, defaults to "localhost"
 
 # Mailgun settings (for sending emails)
 MAILGUN_DOMAIN="example.com"         # Mailgun domain
