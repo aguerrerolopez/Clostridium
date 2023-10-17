@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-def read_data(path, rawpath, data="train"):
+def read_data(path, rawpath, data="train", remove_days=False):
     # os.walk all the files in the data folder:
     listOfFiles = list()
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -37,7 +37,7 @@ def read_data(path, rawpath, data="train"):
 
     # Read labels from todas_labels.xlsx
     labels = pd.read_excel("data/todas_labels.xlsx", header=None)
-    ids = [int(file.split("/")[-1].split("_")[0]) for file in listOfFiles]
+    ids = [file.split("/")[3] for file in listOfFiles]
 
     # Read each csv of listOfFiles and append it to df to the MALDI column
     if data == "test":
@@ -70,12 +70,12 @@ def read_data(path, rawpath, data="train"):
             )
         df = pd.DataFrame(data, columns=["id", "MALDI_mass", "MALDI_int", "label"])
 
-    # Substitute the label with the number of the class: '027' -> 0, '181' -> 1, rest -> 2
-    df["label"] = df["label"].replace({"027": 0, "181": 1})
-    # All other labels are 2
-    for index in df["label"].value_counts().index:
-        if index != 0 and index != 1:
-            df["label"] = df["label"].replace({index: 2})
+    # Remove all samples with the following labels: '106', 001, 017, 078, 207, 014, 023, 002, 651, 170, 173 (ONLY FOR EXPERIMENT 1)
+    df = df[~df["label"].isin(["106", "001", "017", "078", "207", "014", "023", "002", "651", "170", "173"])]
+
+    # Substitute the label with the number of the class: '027' -> 0, all the others are 1
+    df["label"] = df["label"].apply(lambda x: 0 if x == "027" else 1)
+    
 
     # Split train and test by "id" column
     if data == "train":
@@ -132,3 +132,4 @@ def read_data(path, rawpath, data="train"):
             data = pickle.load(handle)
 
         
+read_data(path="data/maldi_processed/initial", rawpath="data/all_maldi")
