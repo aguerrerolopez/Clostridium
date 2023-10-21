@@ -91,21 +91,21 @@ def main(model, config, depth=None, wandbflag=False):
         print("Training KSSHIBA")
         model = KSSHIBA(kernel=kernel, epochs=epochs, fs=fs)
 
-        # model.fit(x_train, y_train)
+        model.fit(x_train, y_train)
 
-        # print("Evaluating KSSHIBA")
-        # # # Evaluation
-        # pred = model.predict(x_test)
-        # pred_proba = model.predict_proba(x_test)
-        # pred_proba = pred_proba / pred_proba.sum(axis=1)[:, None]
+        print("Evaluating KSSHIBA")
+        # # Evaluation
+        pred = model.predict(x_test)
+        pred_proba = model.predict_proba(x_test)
+        pred_proba = pred_proba / pred_proba.sum(axis=1)[:, None]
 
-        # multi_class_evaluation(
-        #     y_test,
-        #     pred,
-        #     pred_proba,
-        #     results_path=results,
-        #     wandbflag=wandbflag,
-        # )
+        multi_class_evaluation(
+            y_test,
+            pred,
+            pred_proba,
+            results_path=results,
+            wandbflag=wandbflag,
+        )
 
         model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
         pickle.dump(model, open(results + "/model_all.pkl", "wb"))

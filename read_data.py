@@ -8,26 +8,26 @@ from sklearn.model_selection import train_test_split
 def read_data(path, rawpath, data="train", remove_days=False):
     # os.walk all the files in the data folder:
     listOfFiles = list()
-    for (dirpath, dirnames, filenames) in os.walk(path):
+    for dirpath, dirnames, filenames in os.walk(path):
         listOfFiles += [os.path.join(dirpath, file) for file in filenames]
 
     if remove_days:
         # For each path in listoffiles only keep the first 7 folders of the path
         listOfFiles2 = list(
-        set(["/".join(file.split("/")[:14]) for file in listOfFiles])
-    )
+            set(["/".join(file.split("/")[:14]) for file in listOfFiles])
+        )
         for f in listOfFiles2:
             fulpath = "/".join(f.split("/")[:14])
             path_to_parent_folder = "/".join(f.split("/")[:12])
             pocillo = fulpath.split("/")[-1]
             parent_folder = fulpath.split("/")[-2]
             # Move the folder up one folder and remove the original folder
-            os.system(f"mv {fulpath} {path_to_parent_folder}/{parent_folder}_{pocillo}/")
-
-
+            os.system(
+                f"mv {fulpath} {path_to_parent_folder}/{parent_folder}_{pocillo}/"
+            )
 
     listOfFilesraw = list()
-    for (dirpath, dirnames, filenames) in os.walk(rawpath):
+    for dirpath, dirnames, filenames in os.walk(rawpath):
         listOfFilesraw += [os.path.join(dirpath, file) for file in filenames]
 
     # For each path in listoffilesraw only keep the first 7 folders of the path
@@ -71,49 +71,70 @@ def read_data(path, rawpath, data="train", remove_days=False):
         df = pd.DataFrame(data, columns=["id", "MALDI_mass", "MALDI_int", "label"])
 
     # Remove all samples with the following labels: '106', 001, 017, 078, 207, 014, 023, 002, 651, 170, 173 (ONLY FOR EXPERIMENT 1)
-    df = df[~df["label"].isin(["106", "001", "017", "078", "207", "014", "023", "002", "651", "170", "173"])]
+    df = df[
+        ~df["label"].isin(
+            [
+                "106",
+                "001",
+                "017",
+                "078",
+                "207",
+                "014",
+                "023",
+                "002",
+                "651",
+                "170",
+                "173",
+            ]
+        )
+    ]
 
     # Substitute the label with the number of the class: '027' -> 0, all the others are 1
     df["label"] = df["label"].apply(lambda x: 0 if x == "027" else 1)
-    
 
     # Split train and test by "id" column
-    if data == "train":
-        ids_to_split = df["id"].unique()
-        df_train = df[df["id"].isin(ids_to_split[: int(len(ids_to_split) * 0.7)])]
-        df_test = df[df["id"].isin(ids_to_split[int(len(ids_to_split) * 0.7) :])]
-        # check that the any id in train is not in test
-        assert len(set(df_train["id"].unique()) & set(df_test["id"].unique())) == 0
-        # Store them as xlsx
-        df_train.to_excel("data/train_exp1.xlsx", index=False)
-        df_test.to_excel("data/val_exp1.xlsx", index=False)
-        # Train dictionary
-        train = {
-            "ids": df_train["id"].values,
-            "masses": df_train["MALDI_mass"].values,
-            "intensities": df_train["MALDI_int"].values,
-            "labels": df_train["label"].values,
-        }
-        # Test dictionary
-        test = {
-            "ids": df_test["id"].values,
-            "masses": df_test["MALDI_mass"].values,
-            "intensities": df_test["MALDI_int"].values,
-            "labels": df_test["label"].values,
-        }
-        data = {"train": train, "test": test}
-        with open("data/data_exp1.pkl", "wb") as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    ids_of_class_0 = df[df["label"] == 0]["id"].unique()
+    ids_of_class_1 = df[df["label"] == 1]["id"].unique()
+    # Let 70% in train and 30% in test
+    ids_to_split_0 = train_test_split(ids_of_class_0, train_size=0.7, random_state=42)
+    ids_of_class_1 = train_test_split(ids_of_class_1, train_size=0.7, random_state=42)
+    # Concatenate the ids
+    ids_to_split = np.concatenate([ids_to_split_0[0], ids_of_class_1[0]])
+    # Split train and test
+    df_train = df[df["id"].isin(ids_to_split)]
+    df_test = df[~df["id"].isin(ids_to_split)]
+    # check that the any id in train is not in test
 
-        # Given the ids in train and test, create two different folders with the raw data splitted
-        for file in listOfFilesraw:
-            id = int(file.split("/")[-1].split("-")[1])
-            if id in df_train["id"].values:
-                os.system(f"cp -R {file} data/exp1/rain")
-            elif id in df_test["id"].values:
-                os.system(f"cp -R {file} data/exp1/val")
+    # Store them as xlsx
+    df_train.to_excel("data/train_exp1.xlsx", index=False)
+    df_test.to_excel("data/val_exp1.xlsx", index=False)
+    # Train dictionary
+    train = {
+        "ids": df_train["id"].values,
+        "masses": df_train["MALDI_mass"].values,
+        "intensities": df_train["MALDI_int"].values,
+        "labels": df_train["label"].values,
+    }
+    # Test dictionary
+    test = {
+        "ids": df_test["id"].values,
+        "masses": df_test["MALDI_mass"].values,
+        "intensities": df_test["MALDI_int"].values,
+        "labels": df_test["label"].values,
+    }
+    data = {"train": train, "test": test}
+    with open("data/data_exp1.pkl", "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    elif data == "test":
+    # Given the ids in train and test, create two different folders with the raw data splitted
+    for file in listOfFilesraw:
+        id = int(file.split("/")[-1].split("-")[1])
+        if id in df_train["id"].values:
+            os.system(f"cp -R {file} data/exp1/rain")
+        elif id in df_test["id"].values:
+            os.system(f"cp -R {file} data/exp1/val")
+
+    if data == "test":
         # Store it as xlsx valled test exp3
         df.to_excel("data/test_exp3.xlsx", index=False)
         # Test dictionary
@@ -131,5 +152,5 @@ def read_data(path, rawpath, data="train", remove_days=False):
         with open("data/data_exp3.pkl", "rb") as handle:
             data = pickle.load(handle)
 
-        
+
 read_data(path="data/maldi_processed/initial", rawpath="data/all_maldi")

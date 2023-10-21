@@ -56,7 +56,7 @@ def multi_class_evaluation(
         cm = confusion_matrix(true_value, pred)
         # Store it as png
         disp = ConfusionMatrixDisplay(
-            confusion_matrix=cm, display_labels=["RT027", "RT181", "Others"]
+            confusion_matrix=cm, display_labels=["RT027", "RT027-like"]
         )
         disp.plot()
         plt.savefig(results_path + "/confusion_matrix.png")

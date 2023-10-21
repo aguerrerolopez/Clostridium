@@ -9,13 +9,11 @@ import os
 def main(model, config, depth=None, wandbflag=False):
     # ============ Load config ===================
     print("Loading config")
-    with open(
-         config
-    ) as file:
+    with open(config) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     main_path = config["main_path"]
-    maldi_path = main_path + "data/data_final.pkl"
+    maldi_path = main_path + "data/data_exp1.pkl"
     results = main_path + "results_paper/"
 
     # ============ Load data ===================

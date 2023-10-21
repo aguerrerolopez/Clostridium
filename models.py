@@ -91,7 +91,6 @@ class FAVAE:
         ohe.fit(y_train.reshape(-1, 1))
         y_train_ohe = ohe.transform(y_train.reshape(-1, 1))
 
-        print(y_train_ohe)
         labels = self.model.struct_data(y_train_ohe, "mult")
 
         print("Training model...")
