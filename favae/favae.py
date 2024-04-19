@@ -1,4 +1,3 @@
-
 import numpy as np
 from scipy import linalg
 import copy
@@ -12,12 +11,16 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import r2_score
 import torch
 from torch import nn, optim
-import pyro.contrib.gp as gp
+
+# import pyro.contrib.gp as gp
 import time
+
 # import wandb
 
-sys.path.append("/export/usuarios01/alexjorguer/Datos/HospitalProject/maldi_PIKE/maldi-learn/maldi_learn")
-from kernels import DiffusionKernel
+sys.path.append(
+    "/export/usuarios01/alexjorguer/Datos/HospitalProject/maldi_PIKE/maldi-learn/maldi_learn"
+)
+# from kernels import DiffusionKernel
 
 # Change only this lane to change the VAE used in FA-VAE
 # import tempVAE as vae
@@ -26,7 +29,6 @@ from favae import vanillaVAE as vae
 
 torch.manual_seed(0)
 np.random.seed(0)
-
 
 
 class SSHIBA(object):
@@ -136,7 +138,7 @@ class SSHIBA(object):
             else:
                 n.append(int(arg["data"].shape[0]))
         self.n_max = np.max(n)
-        # self.wandb_obj = [None] * len(n)
+        # self.wandb_obj = [None] * len(n)
         self.n = []
         self.d = []
         self.sparse = []
@@ -525,7 +527,7 @@ class SSHIBA(object):
         self.AUC_tr = []
         self.ACC = []
         self.ACC_tr = []
-        # self.wandb_metrics = {}
+        # self.wandb_metrics = {}
         self.m = m + 1
         self.SS_acc = [[0] for m in range(self.m)]
         self.train_acc = [[0] for m in range(self.m)]
@@ -674,14 +676,14 @@ class SSHIBA(object):
                     abs(1 - np.mean(self.L[-101:-1]) / self.L[-1]) < tol
                 ):
                     verboseprint("\nModel correctly trained. Convergence achieved")
-                    # self.wandb.finish()
+                    # self.wandb.finish()
                     return
 
-            # self.wandb_metrics["SSHIBA ELBO"] = float(self.L[-1])
-            # self.wandb_metrics["K dimensions"] = q.Kc
+            # self.wandb_metrics["SSHIBA ELBO"] = float(self.L[-1])
+            # self.wandb_metrics["K dimensions"] = q.Kc
 
-            # self.wandb.log(# self.wandb_metrics)
-        # self.wandb.finish()
+            # self.wandb.log(# self.wandb_metrics)
+        # self.wandb.finish()
         verboseprint("")
 
     def rbf_kernel_sig(self, X1, X2, sig=0):
@@ -1524,7 +1526,6 @@ class SSHIBA(object):
         else:
             prod = np.diag(q.W[m]["prodT"])
         q.alpha[m]["b"] = (self.hyper.alpha_b[m] + 0.5 * prod) / (self.d[m])
-
 
     def update_tau(self, m):
         """Updates the variable tau.

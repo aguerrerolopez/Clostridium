@@ -3,132 +3,183 @@ import os
 import pickle
 import numpy as np
 from sklearn.model_selection import train_test_split
+from preprocess import SpectrumObject
 
 
-def read_data(path, rawpath, data="train"):
-    # os.walk all the files in the data folder:
-    listOfFiles = list()
-    for (dirpath, dirnames, filenames) in os.walk(path):
-        listOfFiles += [os.path.join(dirpath, file) for file in filenames]
+def read_data(dir, train=False):
 
-    if remove_days:
-        # For each path in listoffiles only keep the first 7 folders of the path
-        listOfFiles2 = list(
-        set(["/".join(file.split("/")[:14]) for file in listOfFiles])
-    )
-        for f in listOfFiles2:
-            fulpath = "/".join(f.split("/")[:14])
-            path_to_parent_folder = "/".join(f.split("/")[:12])
-            pocillo = fulpath.split("/")[-1]
-            parent_folder = fulpath.split("/")[-2]
-            # Move the folder up one folder and remove the original folder
-            os.system(f"mv {fulpath} {path_to_parent_folder}/{parent_folder}_{pocillo}/")
+    # read train data
+    train_data_acqu_path = []
+    train_data_fid_path = []
+    train_label = []
+    train_id = []
 
+    # Each "acqu" file contains the data for a single sample, a "fid" file contains the metadata
+    # Walk through the train directory and read the data
+    for root, dirs, files in os.walk(dir):
+        for file in files:
+            if file.endswith("acqu"):
+                if train:
+                    id = root.split("/")[5].split("-")[1]
+                    train_id.append(id)
+                    label = root.split("/")[4]
+                    train_label.append(label)
+                else:
+                    id = [str(i) for i in root.split("/") if len(i) > 6][0]
+                    train_id.append(id)
+                train_data_acqu_path.append(os.path.join(root, file))
+            if file.endswith("fid"):
+                train_data_fid_path.append(os.path.join(root, file))
 
+    # For each acqu and fid file, create a SpectrumObject and store it in a list
+    train_data = []
 
-    listOfFilesraw = list()
-    for (dirpath, dirnames, filenames) in os.walk(rawpath):
-        listOfFilesraw += [os.path.join(dirpath, file) for file in filenames]
-
-    # For each path in listoffilesraw only keep the first 7 folders of the path
-    listOfFilesraw = list(
-        set(["/".join(file.split("/")[:12]) for file in listOfFilesraw])
-    )
-
-    # Read labels from todas_labels.xlsx
-    labels = pd.read_excel("data/todas_labels.xlsx", header=None)
-    ids = [int(file.split("/")[-1].split("_")[0]) for file in listOfFiles]
-
-    # Read each csv of listOfFiles and append it to df to the MALDI column
-    if data == "test":
-        data = []
-        for file in listOfFiles:
-            d = pd.read_csv(file)
-            id = int(file.split("/")[-1].split("_")[0])
-            data.append(
-                [
-                    id,
-                    d["mass"].values[:18000],
-                    d["intensity"].values[:18000],
-                    str(labels[labels[1] == id][2].values[0]),
-                ]
+    for i in range(len(train_data_acqu_path)):
+        try:
+            spectrum = SpectrumObject.from_bruker(
+                train_data_acqu_path[i], train_data_fid_path[i], preprocess=True
             )
-        df = pd.DataFrame(data, columns=["id", "MALDI_mass", "MALDI_int", "label"])
-    elif data == "train":
-        data = []
-        for file in listOfFiles:
-            d = pd.read_csv(file)
-            id = int(file.split("/")[-2].split("-")[1])
-            label = file.split("/")[-2].split("-")[0]
-            data.append(
-                [
-                    id,
-                    d["mass"].values[:18000],
-                    d["intensity"].values[:18000],
-                    str(label),
-                ]
-            )
-        df = pd.DataFrame(data, columns=["id", "MALDI_mass", "MALDI_int", "label"])
+        except UnboundLocalError:
+            train_data.append(None)
+            continue
+        train_data.append(spectrum)
 
-    # Substitute the label with the number of the class: '027' -> 0, '181' -> 1, rest -> 2
-    df["label"] = df["label"].replace({"027": 0, "181": 1})
-    # All other labels are 2
-    for index in df["label"].value_counts().index:
-        if index != 0 and index != 1:
-            df["label"] = df["label"].replace({index: 2})
+    # Remove from train id and trian label the samples where train data is None
+    if train:
+        train_id = [
+            train_id[i] for i in range(len(train_data)) if train_data[i] is not None
+        ]
+        train_label = [
+            train_label[i] for i in range(len(train_data)) if train_data[i] is not None
+        ]
+    train_data = [
+        train_data[i] for i in range(len(train_data)) if train_data[i] is not None
+    ]
 
-    # Split train and test by "id" column
-    if data == "train":
-        ids_to_split = df["id"].unique()
-        df_train = df[df["id"].isin(ids_to_split[: int(len(ids_to_split) * 0.7)])]
-        df_test = df[df["id"].isin(ids_to_split[int(len(ids_to_split) * 0.7) :])]
-        # check that the any id in train is not in test
-        assert len(set(df_train["id"].unique()) & set(df_test["id"].unique())) == 0
-        # Store them as xlsx
-        df_train.to_excel("data/train_exp1.xlsx", index=False)
-        df_test.to_excel("data/val_exp1.xlsx", index=False)
-        # Train dictionary
-        train = {
-            "ids": df_train["id"].values,
-            "masses": df_train["MALDI_mass"].values,
-            "intensities": df_train["MALDI_int"].values,
-            "labels": df_train["label"].values,
-        }
-        # Test dictionary
-        test = {
-            "ids": df_test["id"].values,
-            "masses": df_test["MALDI_mass"].values,
-            "intensities": df_test["MALDI_int"].values,
-            "labels": df_test["label"].values,
-        }
-        data = {"train": train, "test": test}
-        with open("data/data_exp1.pkl", "wb") as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if train:
+        assert len(train_data) == len(train_id) == len(train_label)
 
-        # Given the ids in train and test, create two different folders with the raw data splitted
-        for file in listOfFilesraw:
-            id = int(file.split("/")[-1].split("-")[1])
-            if id in df_train["id"].values:
-                os.system(f"cp -R {file} data/exp1/rain")
-            elif id in df_test["id"].values:
-                os.system(f"cp -R {file} data/exp1/val")
+    return train_data, train_id, train_label
 
-    elif data == "test":
-        # Store it as xlsx valled test exp3
-        df.to_excel("data/test_exp3.xlsx", index=False)
-        # Test dictionary
-        test = {
-            "ids": df["id"].values,
-            "masses": df["MALDI_mass"].values,
-            "intensities": df["MALDI_int"].values,
-            "labels": df["label"].values,
-        }
-        data = {"test": test}
-        with open("data/data_exp3.pkl", "wb") as handle:
-            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Read data from the pkl
-        with open("data/data_exp3.pkl", "rb") as handle:
-            data = pickle.load(handle)
+path = "data/bruker_file/all_maldi"
 
-        
+# train directory
+train_dir = os.path.join(path, "initial")
+
+# test directory
+test_dir = os.path.join(path, "test")
+
+# outbreak directory
+outbreak_dir = os.path.join(path, "outbreak")
+
+train_data, train_id, train_label = read_data(train_dir, train=True)
+test_data, test_id, test_label = read_data(test_dir)
+outbreak_data, outbreak_id, outbreak_label = read_data(outbreak_dir)
+
+# RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+# Use the intensitys as values
+X = np.vstack([data.intensity for data in train_data])
+y = train_label
+
+# Categorize the labels
+from sklearn import preprocessing
+
+le = preprocessing.LabelEncoder()
+le.fit(y)
+train_label = le.transform(y)
+
+
+# %%
+# Lets do the full pipeline 10 times to check the variability of the results
+balanced_acc = []
+folds = 3
+for f in range(folds):
+    print("Fold: ", f)
+
+    # We have to split the data into training and test sets by train_id which is the identifier unique of each sample (They are repeated)
+    unique_train_id = np.unique(train_id)
+    # Split the unique_train_id into training and test sets
+    x_train_id, x_test_id = train_test_split(
+        unique_train_id, test_size=0.2, random_state=0
+    )
+
+    # Create the training and test sets
+    X_train = np.vstack(
+        [X[i] for i in range(len(train_id)) if train_id[i] in x_train_id]
+    )
+    y_train = np.array(
+        [train_label[i] for i in range(len(train_id)) if train_id[i] in x_train_id]
+    )
+    X_test = np.vstack([X[i] for i in range(len(train_id)) if train_id[i] in x_test_id])
+    y_test = np.array(
+        [train_label[i] for i in range(len(train_id)) if train_id[i] in x_test_id]
+    )
+
+    # Get the value counts of labels per set
+    print(pd.Series(y_train).value_counts())
+    print(pd.Series(y_test).value_counts())
+
+    # Now translate them to real labels
+    print(pd.Series(le.inverse_transform(y_train)).value_counts())
+    print(pd.Series(le.inverse_transform(y_test)).value_counts())
+
+    # Oversample with SMOTE
+    from imblearn.over_sampling import SMOTE
+
+    sm = SMOTE(random_state=0)
+    X_train, y_train = sm.fit_resample(X_train, y_train)
+
+    # GridSearch a RF
+    from sklearn.model_selection import GridSearchCV
+
+    # Create the parameter grid based on the results of random search
+    param_grid = {
+        "bootstrap": [True, False],
+        "max_depth": [70, 80, 90],
+        "max_features": [50, 1000, 3000, None],
+        "min_samples_leaf": [3, 5],
+        "min_samples_split": [8, 12],
+        "n_estimators": [100],
+    }
+
+    # Create a based model
+    rf = RandomForestClassifier()
+
+    # Instantiate the grid search model
+    grid_search = GridSearchCV(
+        estimator=rf, param_grid=param_grid, cv=3, n_jobs=-1, verbose=1
+    )
+
+    # Fit the grid search to the data
+    grid_search.fit(X_train, y_train)
+
+    # Train the Classifier to take the training features and learn how they relate to the training y (the species)
+    grid_search.best_estimator_.fit(X_train, y_train)
+
+    # Apply the Classifier we trained to the test data (which, remember, it has never seen before)
+    y_pred = grid_search.best_estimator_.predict(X_test)
+
+    # Balanced accuracy
+    from sklearn.metrics import balanced_accuracy_score
+
+    bac = balanced_accuracy_score(y_test, y_pred)
+    balanced_acc.append(bac)
+
+    print("Best params: ", grid_search.best_params_)
+
+    print("Balanced accuracy: ", bac)
+
+
+# Print mean and std of balanced accuracy
+print("Mean balanced accuracy: ", np.mean(balanced_acc))
+print("Std balanced accuracy: ", np.std(balanced_acc))
+
+# Classification report of last fold
+from sklearn.metrics import classification_report
+
+print(classification_report(y_test, y_pred, target_names=le.classes_))
+
+# %%

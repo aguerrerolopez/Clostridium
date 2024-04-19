@@ -15,9 +15,7 @@ from tqdm import tqdm
 
 
 class VAE(nn.Module):
-    def __init__(
-        self, channels=1, zDim=2, dataset="mnist", latentspace_lr=1
-    ):
+    def __init__(self, channels=1, zDim=2, dataset="mnist", latentspace_lr=1):
         super(VAE, self).__init__()
         self.channels = channels
         self.dataset = dataset
@@ -25,8 +23,14 @@ class VAE(nn.Module):
         self.latentspace_lr = latentspace_lr
 
         # Linear encoder
-        self.enc = nn.Sequential(nn.Linear(18000, 512),
-                    nn.ReLU())
+        self.enc = nn.Sequential(
+            nn.Linear(18000, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+        )
 
         # MLP that generate mu and log_var
         self.fc_mu = nn.Sequential(
@@ -37,8 +41,15 @@ class VAE(nn.Module):
         )
         # Linear decoder
         self.dec = nn.Sequential(
-                    nn.Linear(zDim, 18000),
-                    nn.Softplus())
+            nn.Linear(zDim, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 18000),
+            nn.Softplus(),
+        )
 
     def encoder(self, x):
         # CNN
@@ -78,7 +89,6 @@ class SignalVAE(VAE):
         dataset=None,
         latentspace_lr=1,
     ):
-
         super().__init__(
             channels=channels,
             zDim=dimx,
@@ -208,7 +218,7 @@ class SignalVAE(VAE):
             self.reconstruc_during_training.append(train_rec / len(loader))
             self.KL_QandP.append(train_kl_l / len(loader))
             # Overfitter checker: check if the ELBO is better or worse that previous one
-            elbo_checker = self.restore_weights(elbo_checker, e)
+            # elbo_checker = self.restore_weights(elbo_checker, e)
             # Log the metrics to W&B server
             metrics = {
                 self.dataset + " ELBO": float(self.elbo_training[-1]),
@@ -252,7 +262,7 @@ class SignalVAE(VAE):
             # save checkpoint
             torch.save(
                 checkpoint,
-                "/export/usuarios01/alexjorguer/Datos/HospitalProject/Clostridium/checkpoints/"
+                "./checkpoints/"
                 + self.dataset
                 + "_celeba_vanilla_"
                 + str(self.latentspace_lr)
@@ -261,9 +271,11 @@ class SignalVAE(VAE):
             elbo_checker = self.elbo_training[-1]
         # If actual ELBO is worse, load best checkpoint
         if self.elbo_training[-1] < elbo_checker:
+            print("Current ELBO is: ", self.elbo_training[-1])
+            print("and is worse than previous one: ", elbo_checker)
             print("Restoring best training elbo")
             ckp = torch.load(
-                "/export/usuarios01/alexjorguer/Datos/HospitalProject/Clostridium/checkpoints/"
+                "./checkpoints/"
                 + self.dataset
                 + "_celeba_vanilla_"
                 + str(self.latentspace_lr)

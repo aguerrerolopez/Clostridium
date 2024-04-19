@@ -1,32 +1,35 @@
 import argparse
-from sklearn.model_selection import train_test_split
-import yaml
 from imblearn.over_sampling import RandomOverSampler
 import pickle
 import numpy as np
 from performance_tools import plot_tree, plot_importances, multi_class_evaluation
 import wandb
-from lazypredict.Supervised import LazyClassifier
+
+# from lazypredict.Supervised import LazyClassifier
 import os
+
+# Import smote
+from imblearn.over_sampling import SMOTE
 
 
 def main(model, config, depth=None, wandbflag=False):
     # ============ Load config ===================
     print("Loading config")
-    with open(
-        "/export/usuarios01/alexjorguer/Datos/HospitalProject/Clostridium/" + config
-    ) as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
+    # with open(
+    #     "/export/usuarios01/alexjorguer/Datos/HospitalProject/Clostridium/" + config
+    # ) as file:
+    #     config = yaml.load(file, Loader=yaml.FullLoader)
 
-    main_path = config["main_path"]
-    # maldi_data_path = main_path + "data/data_exp1.pkl"
-    results = main_path + "results_paper/"
+    # main_path = config["main_path"]
+    # # maldi_data_path = main_path + "data/data_exp1.pkl"
+    # results = main_path + "results_paper/"
+    results = "results_paper/"
 
     # ============ Wandb ===================
     if wandbflag:
         config_dict = {
             "static_config": config,
-            "hyerparams": {"depth": depth, "model": model},
+            "hyperparams": {"depth": depth, "model": model},
         }
         wandb.init(
             project="clostridium",
@@ -44,19 +47,28 @@ def main(model, config, depth=None, wandbflag=False):
     with open(maldi_test_path, "rb") as handle:
         data_test = pickle.load(handle)
 
-    x_train = np.array(data_train["intensity"].tolist())
-    y_train = np.array(data_train["label"].tolist())
-    x_test = np.array(data_test["intensity"].tolist())
-    y_test = np.array(data_test["label"].tolist())
-    
-    # Convert the labels: if 027 is 0, if 181 is 1, all the rest is 2
-    y_train[y_train == "027"] = 0
-    y_train[y_train == "181"] = 1
-    y_train[y_train == "other"] = 2
-    y_test[y_test == "027"] = 0
-    y_test[y_test == "181"] = 1
-    y_test[y_test == "other"] = 2
-    
+    x_train = np.array([a[:18000] for a in data_train["intensity"].values]) * 1e4
+    x_test = np.array([a[:18000] for a in data_test["intensity"].values]) * 1e4
+    y_train = data_train["label"].values
+    y_test = data_test["label"].values
+    id_test = data_test["id"].values
+
+    y_test_original = y_test.copy()
+
+    # Get masses
+    x_train_masses = np.array([a[:18000] for a in data_train["mz"].values])
+    x_test_masses = np.array([a[:18000] for a in data_test["mz"].values])
+
+    # Convert the labels: if "027" -> 0, if "181" -> 1, otherwise -> 2
+    y_train = np.array([0 if a == "027" else 1 if a == "181" else 2 for a in y_train])
+    y_test = np.array([0 if a == "027" else 1 if a == "181" else 2 for a in y_test])
+
+    # Oversample trainig data using smtoe
+    sm = SMOTE(random_state=42)
+    x_train, y_train = sm.fit_resample(x_train, y_train)
+
+    # Get now value counts
+    print("Value counts of train: ", np.unique(y_train, return_counts=True))
 
     # ============ Preprocess data ===================
 
@@ -71,9 +83,9 @@ def main(model, config, depth=None, wandbflag=False):
         wandb.log({"Number of samples in test": len(x_test)})
 
     # Check if path "results_paper/model" exists, if not, create it
-    if not os.path.exists(results + "exp1/" + model + "/"):
-        os.makedirs(results + "exp1/" + model + "/")
-    results = results + "exp1/" + model
+    # if not os.path.exists(results + "exp1/" + model + "/"):
+    #     os.makedirs(results + "exp1/" + model + "/")
+    # results = results + "exp1/" + model
 
     if model == "base":
         ros = RandomOverSampler()
@@ -88,12 +100,12 @@ def main(model, config, depth=None, wandbflag=False):
         from models import KSSHIBA
 
         kernel = "linear"
-        epochs = 1000
+        epochs = 200
         fs = True
 
-        results = (
-            results + "_kernel_" + kernel + "_epochs_" + str(epochs) + "_fs_" + str(fs)
-        )
+        # results = (
+        #     results + "_kernel_" + kernel + "_epochs_" + str(epochs) + "_fs_" + str(fs)
+        # )
         # Check if path "results_paper/model" exists, if not, create it
         if not os.path.exists(results):
             os.makedirs(results)
@@ -101,24 +113,31 @@ def main(model, config, depth=None, wandbflag=False):
         print("Training KSSHIBA")
         model = KSSHIBA(kernel=kernel, epochs=epochs, fs=fs)
 
-        # model.fit(x_train, y_train)
+        model.fit(x_train, y_train)
 
-        # print("Evaluating KSSHIBA")
-        # # # Evaluation
-        # pred = model.predict(x_test)
-        # pred_proba = model.predict_proba(x_test)
-        # pred_proba = pred_proba / pred_proba.sum(axis=1)[:, None]
+        print("Evaluating KSSHIBA")
+        # # Evaluation
+        pred = model.predict(x_test)
+        pred_proba = model.predict_proba(x_test)
+        pred_proba = pred_proba / pred_proba.sum(axis=1)[:, None]
 
-        # multi_class_evaluation(
-        #     y_test,
-        #     pred,
-        #     pred_proba,
-        #     results_path=results,
-        #     wandbflag=wandbflag,
-        # )
+        multi_class_evaluation(
+            y_test,
+            pred,
+            pred_proba,
+            results_path=results,
+            wandbflag=wandbflag,
+        )
 
-        model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
-        pickle.dump(model, open(results + "/model_all.pkl", "wb"))
+        # Get which has failed
+        failed = np.where(pred != y_test)[0]
+        # Print the original label and the predicted label
+        print("ID\tOriginal\tPredicted")
+        for i in failed:
+            print(id_test[i], "\t", y_test_original[i], "\t", pred[i])
+
+        # model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
+        # pickle.dump(model, open(results + "/model_all.pkl", "wb"))
 
     elif model == "favae":
         from models import FAVAE
@@ -179,33 +198,44 @@ def main(model, config, depth=None, wandbflag=False):
             wandbflag=wandbflag,
         )
 
+        # Get which has failed
+        failed = np.where(pred != y_test)[0]
+        # Print the original label and the predicted label
+        print("ID\tOriginal\tPredicted")
+        for i in failed:
+            print(id_test[i], "\t", y_test_original[i], "\t", pred[i])
+
         # Retrain the model with all data and save it
-        model = RF(max_depth=depth)
-        model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
-        model = model.get_model()
-        pickle.dump(model, open(results + "/model_all.pkl", "wb"))
-        importances = model.feature_importances_
-        plot_importances(
-            model,
-            importances,
-            x_total_masses,
-            results + "/feature_importance_completemodel.png",
-            wandbflag=wandbflag,
-        )
+        # model = RF(max_depth=depth)
+        # model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
+        # model = model.get_model()
+        # pickle.dump(model, open(results + "/model_all.pkl", "wb"))
+        # importances = model.feature_importances_
+        # plot_importances(
+        #     model,
+        #     importances,
+        #     x_total_masses,
+        #     results + "/feature_importance_completemodel.png",
+        #     wandbflag=wandbflag,
+        # )
 
     elif model == "dblfs":
-        from models import DBLFS
+        from models import LR_ARD
 
-        # Declare the model
-        pred_proba = []
-        for i in np.arange(y_train.shape[1]):
-            model = DBLFS()
-            # TODO: y_train must be ohe, check it
-            model.fit(x_train, y_train[:, i])
-            pred_proba_i = model.predict_proba(x_test)
-            pred_proba.append(pred_proba_i)
-        pred_proba = np.array(pred_proba).T
-        pred = np.argmax(pred_proba, axis=1)
+        # conver y_train to ohe
+        # y_train2 = np.eye(3)[y_train]
+        # y_test2 = np.eye(3)[y_test]
+
+        # # Declare the model
+        # pred_proba = []
+        # for i in np.arange(y_train2.shape[1]):
+        #     model = LR_ARD()
+        #     # TODO: y_train must be ohe, check it
+        #     model.fit(x_train, y_train2[:, i])
+        #     pred_proba_i = model.predict_proba(x_test)
+        #     pred_proba.append(pred_proba_i)
+        # pred_proba = np.array(pred_proba).T
+        # pred = np.argmax(pred_proba, axis=1)
 
     elif model == "lr":
         from models import LR
@@ -302,18 +332,25 @@ def main(model, config, depth=None, wandbflag=False):
             results_path=results,
             wandbflag=wandbflag,
         )
-        model = DecisionTree(max_depth=depth)
-        model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
-        model = model.get_model()
-        pickle.dump(model, open(results + "/model_all.pkl", "wb"))
-        importances = model.feature_importances_
-        plot_importances(
-            model,
-            importances,
-            x_total_masses,
-            results + "/feature_importance_completemodel.png",
-            wandbflag=wandbflag,
-        )
+        # Get which has failed
+        failed = np.where(pred != y_test)[0]
+        # Print the original label and the predicted label
+        print("ID\tOriginal\tPredicted")
+        for i in failed:
+            print(id_test[i], "\t", y_test_original[i], "\t", pred[i])
+
+        # model = DecisionTree(max_depth=depth)
+        # model.fit(np.vstack((x_train, x_test)), np.hstack((y_train, y_test)))
+        # model = model.get_model()
+        # pickle.dump(model, open(results + "/model_all.pkl", "wb"))
+        # importances = model.feature_importances_
+        # plot_importances(
+        #     model,
+        #     importances,
+        #     x_total_masses,
+        #     results + "/feature_importance_completemodel.png",
+        #     wandbflag=wandbflag,
+        # )
         # print("Plotting final tree...")
         # plot_tree(
         #     model,
