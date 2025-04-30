@@ -23,8 +23,8 @@ This repository contains several scripts to ingest, process, train and predict s
      - Decision Tree (DT)
      - Logistic Regression (LR)
      - FAVAE (Factor Analysis Variational AutoEncoder)
-     - KSSHIBA (Kernel Sparse SHIBA)
-     - DBLFS (Dual Bayesian Linear Feature Selection)
+     - KSSHIBA (Kernel SSHIBA)
+     - DBLFS (Dual Bayesian Logistic regresion Feature Selection)
 
 3. **Training Scripts**:
    - `main_trainer.py`: Main training script
